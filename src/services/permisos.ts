@@ -1,3 +1,4 @@
+import { noEncontrado, prohibido } from "@/lib/errores";
 import type { Miembros } from "@/schemas/miembro";
 import type { Rol } from "@/schemas/rol";
 
@@ -25,6 +26,21 @@ export function puede(rol: Rol, accion: Accion): boolean {
 }
 
 type MapaMiembros = Readonly<Miembros>;
+
+/**
+ * Devuelve el rol de `uid` si puede hacer `accion`.
+ * Quien no es miembro recibe 404 (no se revela que el proyecto existe); sin permiso, 403.
+ */
+export function exigirPermiso(
+  miembros: MapaMiembros,
+  uid: string,
+  accion: Accion,
+): Rol {
+  const rol = Object.hasOwn(miembros, uid) ? miembros[uid] : undefined;
+  if (rol === undefined) throw noEncontrado("Proyecto no encontrado");
+  if (!puede(rol, accion)) throw prohibido();
+  return rol;
+}
 
 export function esUltimoPropietario(
   miembros: MapaMiembros,
