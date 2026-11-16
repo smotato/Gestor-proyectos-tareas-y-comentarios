@@ -1,11 +1,15 @@
 import Link from "next/link";
 
-export default function Home() {
+export default function Inicio() {
   return (
-    <main>
-      <h1>Gestor de proyectos</h1>
+    <section aria-labelledby="titulo-inicio">
+      <h1 id="titulo-inicio">Gestor de proyectos</h1>
       <p>Organiza proyectos, tareas y comentarios con tu equipo.</p>
-      <Link href="/proyectos">Ver mis proyectos</Link>
-    </main>
+      <p>
+        <Link href="/proyectos" className="boton">
+          Ver mis proyectos
+        </Link>
+      </p>
+    </section>
   );
 }

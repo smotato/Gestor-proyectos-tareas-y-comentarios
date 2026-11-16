@@ -24,6 +24,10 @@ export class ErrorHttp extends Error {
 
 const MENSAJE_VALIDACION = "Datos inválidos";
 
+export function noAutenticado(mensaje = "Inicia sesión para continuar") {
+  return new ErrorHttp(401, mensaje);
+}
+
 export function prohibido(mensaje = "No tienes permiso para esta acción") {
   return new ErrorHttp(403, mensaje);
 }
