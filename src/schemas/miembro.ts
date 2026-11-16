@@ -11,6 +11,9 @@ export const MiembroSchema = z.strictObject({
 
 export type Miembro = z.infer<typeof MiembroSchema>;
 
+/** Cuerpo de `PATCH /api/proyectos/:id/miembros/:uid`. */
+export const CambiarRolSchema = z.strictObject({ rol: RolSchema });
+
 /** Mapa `uid → rol` tal como se guarda en `proyectos/{id}.miembros`. */
 export const MiembrosSchema = z.record(z.string().min(1), RolSchema);
 

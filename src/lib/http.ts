@@ -68,21 +68,29 @@ export function manejar<C>(handler: Manejador<C>): Manejador<C> {
   };
 }
 
+/**
+ * Lee un cuerpo JSON sin validarlo (lo valida el servicio después de
+ * revisar permisos): 415 si no es JSON, 400 si está mal formado.
+ */
+export async function leerCuerpoJson(request: Request): Promise<unknown> {
+  const tipo = request.headers.get("content-type") ?? "";
+  if (!tipo.includes("application/json")) {
+    throw new ErrorHttp(415, "El cuerpo debe ser JSON");
+  }
+  try {
+    const datos: unknown = await request.json();
+    return datos;
+  } catch {
+    throw new ErrorHttp(400, "El cuerpo no es un JSON válido");
+  }
+}
+
 /** Lee y valida un cuerpo JSON: 415 si no es JSON, 400 si es inválido. */
 export async function leerJson<T extends z.ZodType>(
   request: Request,
   esquema: T,
 ): Promise<z.output<T>> {
-  const tipo = request.headers.get("content-type") ?? "";
-  if (!tipo.includes("application/json")) {
-    throw new ErrorHttp(415, "El cuerpo debe ser JSON");
-  }
-  let datos: unknown;
-  try {
-    datos = await request.json();
-  } catch {
-    throw new ErrorHttp(400, "El cuerpo no es un JSON válido");
-  }
+  const datos = await leerCuerpoJson(request);
   const resultado = esquema.safeParse(datos);
   if (!resultado.success) throw errorDeValidacion(resultado.error);
   return resultado.data;

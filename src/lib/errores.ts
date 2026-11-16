@@ -36,6 +36,10 @@ export function noEncontrado(mensaje = "No encontrado") {
   return new ErrorHttp(404, mensaje);
 }
 
+export function conflicto(mensaje: string) {
+  return new ErrorHttp(409, mensaje);
+}
+
 export function errorDeCampo(campo: string, mensaje: string): ErrorHttp {
   return new ErrorHttp(400, MENSAJE_VALIDACION, [{ campo, mensaje }]);
 }

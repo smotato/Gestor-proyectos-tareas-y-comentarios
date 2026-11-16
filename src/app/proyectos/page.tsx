@@ -1,38 +1,29 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { usuarioActual } from "@/lib/auth-servidor";
+import { Esqueleto } from "@/components/Esqueleto";
+import { FormularioNuevoProyecto } from "@/components/proyectos/FormularioNuevoProyecto";
+import { ListaProyectos } from "@/components/proyectos/ListaProyectos";
 
 export const metadata: Metadata = { title: "Mis proyectos" };
 
-/** Verificación real de la sesión (el proxy solo redirige si falta la cookie). */
-async function DatosSesion() {
-  const usuario = await usuarioActual();
-  if (!usuario) redirect("/login?siguiente=/proyectos");
-  return (
-    <p>
-      Sesión iniciada como <strong>{usuario.correo ?? usuario.uid}</strong>. La
-      lista de proyectos llega con RF-01.
-    </p>
-  );
-}
-
-function EsqueletoSesion() {
-  return (
-    <div className="esqueleto" role="status" aria-live="polite">
-      <span className="sr-only">Comprobando tu sesión…</span>
-      <div className="esqueleto__linea esqueleto__linea--corta" />
-    </div>
-  );
-}
-
+/**
+ * La lista verifica la sesión en el servidor (el proxy solo redirige si falta
+ * la cookie). Si falla la carga, `error.tsx` muestra el error y "Reintentar".
+ */
 export default function PaginaProyectos() {
   return (
-    <section aria-labelledby="titulo-proyectos">
-      <h1 id="titulo-proyectos">Mis proyectos</h1>
-      <Suspense fallback={<EsqueletoSesion />}>
-        <DatosSesion />
-      </Suspense>
-    </section>
+    <div className="pila">
+      <h1>Mis proyectos</h1>
+      <section aria-labelledby="titulo-crear" className="tarjeta-borde">
+        <h2 id="titulo-crear">Crear proyecto</h2>
+        <FormularioNuevoProyecto />
+      </section>
+      <section aria-labelledby="titulo-lista">
+        <h2 id="titulo-lista">Tus proyectos</h2>
+        <Suspense fallback={<Esqueleto etiqueta="Cargando tus proyectos…" />}>
+          <ListaProyectos />
+        </Suspense>
+      </section>
+    </div>
   );
 }
