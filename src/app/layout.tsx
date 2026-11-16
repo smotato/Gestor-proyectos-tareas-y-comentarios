@@ -4,6 +4,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { EnlacesInvitado, MenuSesion } from "@/components/MenuSesion";
 import "./globals.css";
+import "./proyectos.css";
+import "./tareas.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

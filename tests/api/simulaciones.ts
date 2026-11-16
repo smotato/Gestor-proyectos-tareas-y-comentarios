@@ -1,4 +1,5 @@
 import type { Proyecto } from "@/schemas/proyecto";
+import type { Tarea } from "@/schemas/tarea";
 
 /** Proyecto de ejemplo: u1 propietario, u2 editor, u3 lector. */
 export function proyectoDePrueba(cambios: Partial<Proyecto> = {}): Proyecto {
@@ -30,4 +31,20 @@ export function peticionJson(
     headers: { "content-type": "application/json" },
     body: cuerpo === undefined ? undefined : JSON.stringify(cuerpo),
   });
+}
+
+/** Tarea de ejemplo creada por u1 y asignada a u2. */
+export function tareaDePrueba(cambios: Partial<Tarea> = {}): Tarea {
+  return {
+    id: "t1",
+    titulo: "Maqueta",
+    descripcion: "",
+    estado: "pendiente",
+    prioridad: "media",
+    responsableUid: "u2",
+    vence: null,
+    creadaPor: "u1",
+    creadaEn: "2026-11-16T10:00:00.000Z",
+    ...cambios,
+  };
 }

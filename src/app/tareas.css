@@ -1,0 +1,114 @@
+/* Tareas: filtros, tablero y diálogo. Mobile-first. */
+
+.filtros {
+  display: grid;
+  gap: 1rem;
+}
+
+.filtros__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 0.75rem 1rem;
+}
+
+.tablero {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.columna {
+  min-width: 0;
+}
+
+.columna > h3 {
+  margin: 0 0 0.75rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 2px solid var(--borde);
+}
+
+.lista-tareas {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tarea {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+}
+
+.tarea__titulo {
+  margin: 0;
+  font-size: 1.0625rem;
+  overflow-wrap: anywhere;
+}
+
+.tarea__datos {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.125rem 0.75rem;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+.tarea__datos dt {
+  color: var(--texto-tenue);
+}
+
+.tarea__datos dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.tarea__estado {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.tarea__estado select {
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--fondo);
+  color: var(--texto);
+  font: inherit;
+}
+
+.dialogo {
+  width: min(100% - 2rem, 32rem);
+  max-height: calc(100dvh - 2rem);
+  padding: 1.5rem;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+.dialogo::backdrop {
+  background: rgb(0 0 0 / 0.6);
+}
+
+.dialogo h2 {
+  margin-top: 0;
+}
+
+.acciones-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+@media (min-width: 48rem) {
+  .tablero {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+}
