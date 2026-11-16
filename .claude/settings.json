@@ -1,0 +1,61 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/.env*)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*firebase-adminsdk*.json)",
+      "Read(~/.ssh/**)",
+      "Read(~/.bashrc)",
+      "Read(~/.profile)",
+      "Read(~/.gitconfig)",
+      "Read(~/.config/**)",
+      "Read(~/.aws/**)",
+      "Read(//mnt/c/**)",
+      "Edit(./.claude/**)",
+      "Write(./.claude/**)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(sudo:*)",
+      "Bash(rm -rf:*)",
+      "Bash(rm -fr:*)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(vercel env pull:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(npm install:*)",
+      "Bash(npm i:*)",
+      "Bash(npm uninstall:*)",
+      "Bash(npx:*)",
+      "Bash(vercel:*)"
+    ],
+    "allow": [
+      "Bash(npm run check)",
+      "Bash(npm run test:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck)",
+      "Bash(git status)",
+      "Bash(git diff:*)"
+    ],
+    "additionalDirectories": [],
+    "blockReadsOutsideWorkingDirectories": true,
+    "blockWritesOutsideWorkingDirectories": true,
+    "disableBypassPermissionsMode": "disable"
+  },
+  "sandbox": {
+    "enabled": true,
+    "failIfUnavailable": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": ["~/"],
+      "allowRead": [".", "~/.nvm", "~/.npm"],
+      "allowWrite": ["~/.npm"]
+    },
+    "network": {
+      "allowedDomains": ["registry.npmjs.org", "github.com"]
+    }
+  }
+}
