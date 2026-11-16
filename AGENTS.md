@@ -41,6 +41,8 @@ La especificación completa está en `docs/requisitos.md`.
 - El `uid` del usuario sale de la sesión, nunca del cuerpo ni de la URL.
 - HTML semántico y accesible (labels, botones de verdad, foco visible).
 - Una tarea pequeña a la vez y explicar qué cambiaste.
+- Los componentes de React también cuentan: si pasan de 50 líneas, divídelos en subcomponentes o hooks.
+- Antes de decir que terminaste, corre `npm run check` completo, corrige todo y muéstrame que pasó.
 
 ## Lo que NO puedes hacer
 
