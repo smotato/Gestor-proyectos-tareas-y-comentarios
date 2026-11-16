@@ -32,13 +32,16 @@
       "Bash(npx:*)",
       "Bash(vercel:*)"
     ],
+
     "allow": [
-      "Bash(npm run check)",
-      "Bash(npm run test:*)",
-      "Bash(npm run lint)",
-      "Bash(npm run typecheck)",
+      "Bash(npm run:*)",
       "Bash(git status)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(ls:*)",
+      "Bash(mkdir:*)"
     ],
     "additionalDirectories": [],
     "blockReadsOutsideWorkingDirectories": true,
