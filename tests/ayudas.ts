@@ -10,3 +10,14 @@ export function capturarErrorHttp(accion: () => unknown): ErrorHttp {
   }
   throw new Error("Se esperaba un ErrorHttp");
 }
+
+/** jsdom no implementa `<dialog>.showModal()` ni `.close()`: se simula lo básico. */
+export function simularDialogoNativo(): void {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("close"));
+  };
+}
