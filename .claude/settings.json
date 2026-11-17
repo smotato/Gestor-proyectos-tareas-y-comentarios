@@ -60,5 +60,18 @@
     "network": {
       "allowedDomains": ["registry.npmjs.org", "github.com"]
     }
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Read|Write|Edit|MultiEdit|NotebookEdit|Glob|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PROJECT_DIR}\"/scripts/ia/bloquear-acciones.mjs"
+          }
+        ]
+      }
+    ]
   }
 }
