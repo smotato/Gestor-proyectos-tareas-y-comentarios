@@ -60,18 +60,19 @@ Autor: Sergio Stiven Motato
 
 ## Scripts
 
-| Comando                | Qué hace                                                                 |
-| ---------------------- | ------------------------------------------------------------------------ |
-| `npm run dev`          | Levanta la app en modo desarrollo                                        |
-| `npm run build`        | Compila para producción                                                  |
-| `npm run start`        | Sirve la compilación de producción (después de `build`)                  |
-| `npm run emuladores`   | Levanta Auth y Firestore locales                                         |
-| `npm run test`         | Corre las pruebas con cobertura                                          |
-| `npm run typecheck`    | Revisa los tipos con TypeScript                                          |
-| `npm run lint`         | Revisa el código con ESLint, sin advertencias                            |
-| `npm run format`       | Da formato a todo el proyecto con Prettier                               |
-| `npm run format:check` | Comprueba el formato sin cambiar nada                                    |
-| `npm run check`        | Tipos + lint + formato + pruebas. Tiene que pasar antes de subir cambios |
+| Comando                | Qué hace                                                                                                                      |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev`          | Levanta la app en modo desarrollo                                                                                             |
+| `npm run build`        | Compila para producción                                                                                                       |
+| `npm run start`        | Sirve la compilación de producción (después de `build`)                                                                       |
+| `npm run emuladores`   | Levanta Auth y Firestore locales                                                                                              |
+| `npm run test`         | Corre las pruebas con cobertura                                                                                               |
+| `npm run e2e`          | Pruebas de extremo a extremo con Playwright en 360, 768 y 1024 px (necesita `npx playwright install chromium` la primera vez) |
+| `npm run typecheck`    | Revisa los tipos con TypeScript                                                                                               |
+| `npm run lint`         | Revisa el código con ESLint, sin advertencias                                                                                 |
+| `npm run format`       | Da formato a todo el proyecto con Prettier                                                                                    |
+| `npm run format:check` | Comprueba el formato sin cambiar nada                                                                                         |
+| `npm run check`        | Tipos + lint + formato + pruebas. Tiene que pasar antes de subir cambios                                                      |
 
 ## Documentación de la API
 
@@ -102,6 +103,19 @@ a `main`, con Node 24: instala con `npm ci`, corre `npm run check`, compila con
 `npm run build` y audita con `npm audit --audit-level=high`. No necesita
 secretos: las pruebas simulan Firebase y la compilación no se conecta a él.
 
+## Calidad y accesibilidad
+
+- `npm run test` incluye las pruebas de accesibilidad de componentes con axe
+  (`tests/accesibilidad/`) y la comprobación de contraste de los cuatro temas:
+  claro, oscuro y alto contraste (`tests/estilos/`).
+- `npm run e2e` corre Playwright sobre una compilación de producción, en 360,
+  768 y 1024 px: sin scroll horizontal y sin violaciones de axe en la portada,
+  `/login` y `/registro`. La primera vez hay que descargar el navegador con
+  `npx playwright install chromium` (en WSL, `--with-deps`).
+- Los retos de excelencia, cómo reproducirlos y su evidencia están en
+  [`CALIDAD.md`](CALIDAD.md); lo que falta por entregar, en
+  [`calidad/README.md`](calidad/README.md).
+
 ## Estructura
 
 ```text
@@ -114,6 +128,9 @@ src/
 ├── repositories/   acceso a Firestore
 └── lib/            Firebase, autenticación, errores, límite de frecuencia
 tests/              pruebas (Vitest)
+e2e/                pruebas de Playwright (npm run e2e)
+calidad/            evidencias de calidad (Lighthouse, capturas, informes)
+CALIDAD.md         retos de excelencia: qué son, cómo reproducirlos y su evidencia
 bruno/              colección de Bruno para probar la API
 openapi.yaml        documentación de la API
 docs/               especificación del proyecto
@@ -178,16 +195,19 @@ expone (`VERCEL_PROJECT_PRODUCTION_URL`).
 
 ## Dependencias y por qué las uso
 
-| Paquete                              | Para qué                                                         |
-| ------------------------------------ | ---------------------------------------------------------------- |
-| `firebase`                           | Inicio de sesión en el navegador                                 |
-| `firebase-admin`                     | Acceso a Firestore y verificación de sesión en el servidor       |
-| `zod`                                | Validar datos en el formulario y en la API con las mismas reglas |
-| `vitest`, `@vitest/coverage-v8`      | Pruebas y cobertura                                              |
-| `@testing-library/*`, `jsdom`        | Probar componentes como lo haría un usuario                      |
-| `prettier`, `eslint-config-prettier` | Formato automático del código                                    |
-| `husky`, `lint-staged`               | Revisar el código antes de cada commit y push                    |
-| `firebase-tools`                     | Emuladores de Firebase para no usar datos reales en desarrollo   |
+| Paquete                              | Para qué                                                                                                                                                                                                    |
+| ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `firebase`                           | Inicio de sesión en el navegador                                                                                                                                                                            |
+| `firebase-admin`                     | Acceso a Firestore y verificación de sesión en el servidor                                                                                                                                                  |
+| `zod`                                | Validar datos en el formulario y en la API con las mismas reglas                                                                                                                                            |
+| `vitest`, `@vitest/coverage-v8`      | Pruebas y cobertura                                                                                                                                                                                         |
+| `axe-core`                           | Motor de accesibilidad. Las pruebas de componentes (Vitest) lo llaman con un ayudante propio, `tests/accesibilidad/axe.ts`, en lugar de usar `vitest-axe` o `jest-axe`: así hay menos paquetes que mantener |
+| `@playwright/test`                   | Abre la app en un navegador real a 360, 768 y 1024 px para comprobar que no hay scroll horizontal (`npm run e2e`)                                                                                           |
+| `@axe-core/playwright`               | Pasa axe a la página ya dibujada en Playwright, con estilos reales: así sí se evalúa el contraste de color                                                                                                  |
+| `@testing-library/*`, `jsdom`        | Probar componentes como lo haría un usuario                                                                                                                                                                 |
+| `prettier`, `eslint-config-prettier` | Formato automático del código                                                                                                                                                                               |
+| `husky`, `lint-staged`               | Revisar el código antes de cada commit y push                                                                                                                                                               |
+| `firebase-tools`                     | Emuladores de Firebase para no usar datos reales en desarrollo                                                                                                                                              |
 
 npm bloquea por defecto los scripts de instalación. Revisé y aprobé solo los
 de `@firebase/util` y `protobufjs`, que son paquetes conocidos que usa Firebase.
