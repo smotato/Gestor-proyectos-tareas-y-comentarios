@@ -8,8 +8,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     setupFiles: ["./vitest.setup.ts"],
-    // Las pruebas de Playwright (e2e/) se corren con `npm run e2e`, no con Vitest.
-    exclude: [...configDefaults.exclude, "e2e/**"],
+    // Playwright (e2e/) y el hook de IA (scripts/) tienen sus propios comandos: no son de Vitest.
+    exclude: [...configDefaults.exclude, "e2e/**", "scripts/**"],
     coverage: {
       provider: "v8",
       include: ["src/services/**", "src/schemas/**"],

@@ -40,6 +40,9 @@ jobs:
       - name: Tipos, lint, formato y pruebas
         run: npm run check
 
+      - name: Pruebas del hook de IA
+        run: npm run test:hook
+
       - name: Compilar
         run: npm run build
 

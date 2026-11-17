@@ -68,6 +68,7 @@ Autor: Sergio Stiven Motato
 | `npm run emuladores`   | Levanta Auth y Firestore locales                                                                                              |
 | `npm run test`         | Corre las pruebas con cobertura                                                                                               |
 | `npm run e2e`          | Pruebas de extremo a extremo con Playwright en 360, 768 y 1024 px (necesita `npx playwright install chromium` la primera vez) |
+| `npm run test:hook`    | Pruebas del hook de IA (`scripts/ia/`), con `node:test`                                                                       |
 | `npm run typecheck`    | Revisa los tipos con TypeScript                                                                                               |
 | `npm run lint`         | Revisa el código con ESLint, sin advertencias                                                                                 |
 | `npm run format`       | Da formato a todo el proyecto con Prettier                                                                                    |
@@ -229,3 +230,9 @@ de `@firebase/util` y `protobufjs`, que son paquetes conocidos que usa Firebase.
 Usé Claude Code con una configuración propia que no le deja leer secretos ni
 salir de la carpeta del proyecto. Los detalles, las pruebas de que las
 restricciones funcionan y la bitácora están en la carpeta [`ia/`](ia/IA.md).
+
+Dos retos más refuerzan esas reglas: un **hook** propio
+(`scripts/ia/bloquear-acciones.mjs`, con sus pruebas en `npm run test:hook`) que
+bloquea leer `.env*`, salir del proyecto o usar `curl`, `wget` y `sudo`, y un
+**subagente revisor** de solo lectura (`ia/propuestas/revisor.md`). Cómo se
+registran y se comprueban está en [`ia/CONFIGURACION.md`](ia/CONFIGURACION.md).
