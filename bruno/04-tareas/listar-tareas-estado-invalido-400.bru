@@ -1,0 +1,19 @@
+meta {
+  name: Listar tareas con un estado inválido (400)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas?estado=zzz
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 400
+}

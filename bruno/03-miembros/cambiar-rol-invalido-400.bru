@@ -1,0 +1,29 @@
+meta {
+  name: Cambiar rol con un valor inválido (400)
+  type: http
+  seq: 5
+}
+
+patch {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/miembros/{{uid}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "rol": "jefe"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

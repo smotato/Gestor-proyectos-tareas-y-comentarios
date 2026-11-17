@@ -1,0 +1,28 @@
+meta {
+  name: Crear proyecto sin nombre (400)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/proyectos
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+  res.body.detalles[0].campo: eq nombre
+}

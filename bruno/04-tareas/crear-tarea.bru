@@ -1,0 +1,40 @@
+meta {
+  name: Crear tarea
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "titulo": "Preparar la maqueta",
+    "prioridad": "alta"
+  }
+}
+
+assert {
+  res.status: eq 201
+  res.body.tarea.estado: eq pendiente
+  res.body.tarea.prioridad: eq alta
+}
+
+script:post-response {
+  bru.setEnvVar("tareaId", res.body.tarea.id);
+}
+
+docs {
+  Un lector recibiría 403. Guarda el id en la variable tareaId.
+}

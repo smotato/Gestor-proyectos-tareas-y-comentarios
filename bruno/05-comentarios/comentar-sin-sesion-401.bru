@@ -1,0 +1,25 @@
+meta {
+  name: Comentar sin sesión (401)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas/{{tareaId}}/comentarios
+  body: json
+  auth: none
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+body:json {
+  {
+    "texto": "Hola"
+  }
+}
+
+assert {
+  res.status: eq 401
+}

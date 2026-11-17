@@ -1,0 +1,25 @@
+meta {
+  name: Iniciar sesión con un idToken inválido (401)
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/auth/sesion
+  body: json
+  auth: none
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+body:json {
+  {
+    "idToken": "token-invalido"
+  }
+}
+
+assert {
+  res.status: eq 401
+}

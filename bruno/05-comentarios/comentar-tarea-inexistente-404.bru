@@ -1,0 +1,29 @@
+meta {
+  name: Comentar una tarea inexistente (404)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas/tarea-que-no-existe/comentarios
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "texto": "Hola"
+  }
+}
+
+assert {
+  res.status: eq 404
+}

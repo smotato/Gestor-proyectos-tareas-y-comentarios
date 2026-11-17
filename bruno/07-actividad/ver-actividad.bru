@@ -1,0 +1,25 @@
+meta {
+  name: Ver la actividad del proyecto
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/actividad
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.items: isArray
+  res.body.items.length: gte 1
+}
+
+docs {
+  Después de correr las carpetas anteriores aparecen la tarea creada, el cambio de estado y el comentario.
+}

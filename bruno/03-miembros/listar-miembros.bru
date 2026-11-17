@@ -1,0 +1,21 @@
+meta {
+  name: Listar miembros
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/miembros
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.rol: eq propietario
+  res.body.items.length: gte 1
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Generar una invitación en un proyecto ajeno (404)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/proyectos/proyecto-que-no-existe/invitaciones
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "rol": "lector"
+  }
+}
+
+assert {
+  res.status: eq 404
+}

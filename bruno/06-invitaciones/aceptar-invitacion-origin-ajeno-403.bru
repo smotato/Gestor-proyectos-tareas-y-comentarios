@@ -1,0 +1,27 @@
+meta {
+  name: Aceptar desde otro sitio: Origin ajeno (403)
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{baseUrl}}/api/invitaciones/{{codigo}}/aceptar
+  body: none
+  auth: bearer
+}
+
+headers {
+  Origin: https://sitio-malicioso.example
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Defensa contra CSRF: una petición que modifica datos con un Origin distinto al del sitio se rechaza.
+}

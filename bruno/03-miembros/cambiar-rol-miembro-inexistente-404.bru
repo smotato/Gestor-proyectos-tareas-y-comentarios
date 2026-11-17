@@ -1,0 +1,29 @@
+meta {
+  name: Cambiar el rol de alguien que no es miembro (404)
+  type: http
+  seq: 7
+}
+
+patch {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/miembros/uid-que-no-existe
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "rol": "lector"
+  }
+}
+
+assert {
+  res.status: eq 404
+}

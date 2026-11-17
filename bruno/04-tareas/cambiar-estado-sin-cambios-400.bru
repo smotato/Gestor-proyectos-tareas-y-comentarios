@@ -1,0 +1,27 @@
+meta {
+  name: Editar una tarea sin enviar ningún campo (400)
+  type: http
+  seq: 10
+}
+
+patch {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas/{{tareaId}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {}
+}
+
+assert {
+  res.status: eq 400
+}

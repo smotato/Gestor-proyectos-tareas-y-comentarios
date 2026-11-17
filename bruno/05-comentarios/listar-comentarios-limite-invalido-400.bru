@@ -1,0 +1,19 @@
+meta {
+  name: Listar comentarios con límite inválido (400)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas/{{tareaId}}/comentarios?limite=0
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 400
+}

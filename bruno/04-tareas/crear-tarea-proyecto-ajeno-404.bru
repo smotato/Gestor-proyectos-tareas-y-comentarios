@@ -1,0 +1,29 @@
+meta {
+  name: Crear tarea en un proyecto ajeno (404)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/proyectos/proyecto-que-no-existe/tareas
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "titulo": "En un proyecto ajeno"
+  }
+}
+
+assert {
+  res.status: eq 404
+}

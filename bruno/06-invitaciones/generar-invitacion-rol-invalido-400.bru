@@ -1,0 +1,29 @@
+meta {
+  name: Generar una invitación con rol propietario (400)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/invitaciones
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "rol": "propietario"
+  }
+}
+
+assert {
+  res.status: eq 400
+}

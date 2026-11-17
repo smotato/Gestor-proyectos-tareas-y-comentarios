@@ -1,0 +1,20 @@
+meta {
+  name: Ver tarea
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas/{{tareaId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.tarea.titulo: eq Preparar la maqueta
+}

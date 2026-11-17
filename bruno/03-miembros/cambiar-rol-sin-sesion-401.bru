@@ -1,0 +1,25 @@
+meta {
+  name: Cambiar rol sin sesión (401)
+  type: http
+  seq: 8
+}
+
+patch {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/miembros/{{uid}}
+  body: json
+  auth: none
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+body:json {
+  {
+    "rol": "lector"
+  }
+}
+
+assert {
+  res.status: eq 401
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Listar proyectos sin sesión (401)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 401
+}

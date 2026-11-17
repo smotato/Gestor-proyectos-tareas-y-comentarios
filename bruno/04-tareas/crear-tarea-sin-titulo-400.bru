@@ -1,0 +1,30 @@
+meta {
+  name: Crear tarea sin título (400)
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "titulo": ""
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.detalles[0].campo: eq titulo
+}

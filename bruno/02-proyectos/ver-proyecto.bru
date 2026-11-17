@@ -1,0 +1,20 @@
+meta {
+  name: Ver proyecto
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.rol: eq propietario
+}

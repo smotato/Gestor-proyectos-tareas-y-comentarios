@@ -1,0 +1,24 @@
+meta {
+  name: Quién soy
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/auth/yo
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.usuario.uid: isString
+}
+
+script:post-response {
+  bru.setEnvVar("uid", res.body.usuario.uid);
+}

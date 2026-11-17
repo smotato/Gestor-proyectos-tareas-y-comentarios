@@ -1,0 +1,19 @@
+meta {
+  name: Ver una tarea inexistente (404)
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/tareas/tarea-que-no-existe
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 404
+}

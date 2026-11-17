@@ -1,0 +1,27 @@
+meta {
+  name: Aceptar tu propia invitación: ya eres miembro (409)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/invitaciones/{{codigo}}/aceptar
+  body: none
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 409
+}
+
+docs {
+  Quien ya es miembro recibe 409 y la invitación no se gasta. Aceptarla con otra cuenta da 200; usada, 409; vencida, 410.
+}

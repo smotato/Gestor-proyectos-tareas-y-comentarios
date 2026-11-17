@@ -1,0 +1,15 @@
+meta {
+  name: Listar miembros sin sesión (401)
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/miembros
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 401
+}

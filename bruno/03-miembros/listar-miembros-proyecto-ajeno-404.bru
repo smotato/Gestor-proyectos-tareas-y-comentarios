@@ -1,0 +1,19 @@
+meta {
+  name: Listar miembros de un proyecto ajeno (404)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/proyecto-que-no-existe/miembros
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 404
+}

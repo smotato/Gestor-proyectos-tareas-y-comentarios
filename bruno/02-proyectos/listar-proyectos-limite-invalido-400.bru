@@ -1,0 +1,19 @@
+meta {
+  name: Listar proyectos con límite inválido (400)
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos?limite=500
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 400
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Degradar al último propietario (409)
+  type: http
+  seq: 6
+}
+
+patch {
+  url: {{baseUrl}}/api/proyectos/{{proyectoId}}/miembros/{{uid}}
+  body: json
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+body:json {
+  {
+    "rol": "editor"
+  }
+}
+
+assert {
+  res.status: eq 409
+}

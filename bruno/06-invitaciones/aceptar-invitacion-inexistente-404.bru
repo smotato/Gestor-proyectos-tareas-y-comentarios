@@ -1,0 +1,23 @@
+meta {
+  name: Aceptar un código inexistente (404)
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{baseUrl}}/api/invitaciones/codigo-que-no-existe/aceptar
+  body: none
+  auth: bearer
+}
+
+headers {
+  Origin: {{baseUrl}}
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 404
+}

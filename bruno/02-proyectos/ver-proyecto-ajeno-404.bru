@@ -1,0 +1,23 @@
+meta {
+  name: Ver un proyecto ajeno o inexistente (404)
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{baseUrl}}/api/proyectos/proyecto-que-no-existe
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{idToken}}
+}
+
+assert {
+  res.status: eq 404
+}
+
+docs {
+  Quien no es miembro recibe 404: no se revela si el proyecto existe.
+}

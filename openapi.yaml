@@ -1,0 +1,900 @@
+openapi: 3.1.0
+info:
+  title: Gestor de proyectos · API
+  version: 1.0.0
+  description: |
+    API REST del gestor de proyectos: proyectos con miembros y roles, tareas,
+    comentarios, registro de actividad e invitaciones.
+
+    **Autenticación.** El navegador inicia sesión con Firebase Auth y cambia el
+    `idToken` por una cookie de sesión `HttpOnly` con `POST /api/auth/sesion`.
+    Para Bruno o Postman también se acepta `Authorization: Bearer <idToken>`.
+    El `uid` del usuario sale siempre de la sesión, nunca del cuerpo ni de la URL.
+
+    **Errores.** Todo error es JSON con la forma `{ "error": "mensaje", "detalles"?: [{ "campo", "mensaje" }] }`.
+    Un 500 nunca incluye detalles internos y trae un `X-Request-Id`.
+
+    **Listas.** Las listas aceptan `limite` (1 a 100, por defecto 20) y `cursor`
+    (el `siguienteCursor` de la página anterior) y responden `{ items, siguienteCursor }`.
+
+    **Permisos.** Quien no es miembro de un proyecto recibe `404` (no se revela que
+    existe); un miembro sin el rol necesario recibe `403`. Un lector solo puede leer;
+    un editor además crea y edita tareas y comentarios; solo el propietario cambia
+    roles, invita y quita miembros.
+
+    **Límite de frecuencia.** Las rutas de escritura admiten 60 peticiones por
+    minuto por IP y ruta; `/api/auth/*` y aceptar invitaciones, 10. Al pasarse
+    responden `429` con `Retry-After`.
+
+    **Cabeceras.** Todas las respuestas llevan `Cache-Control: no-store`. Las
+    peticiones que modifican datos con cookie deben traer un `Origin` del mismo
+    sitio; si no, `403`.
+servers:
+  - url: http://localhost:3000
+    description: Desarrollo local (con los emuladores de Firebase)
+tags:
+  - name: Autenticación
+  - name: Proyectos
+  - name: Miembros
+  - name: Tareas
+  - name: Comentarios
+  - name: Actividad
+  - name: Invitaciones
+security:
+  - cookieAuth: []
+  - bearerAuth: []
+paths:
+  /api/auth/sesion:
+    post:
+      tags: [Autenticación]
+      operationId: iniciarSesion
+      summary: Cambia un idToken reciente por la cookie de sesión
+      description: |
+        Verifica el `idToken` de Firebase (el inicio de sesión debe ser de hace
+        menos de 5 minutos) y crea la cookie `sesion` (`HttpOnly`, `Secure`,
+        `SameSite=Lax`, 5 días). Es pública: no exige sesión previa.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IniciarSesion" }
+      responses:
+        "204":
+          description: Sesión creada.
+          headers:
+            Set-Cookie:
+              description: "`sesion=…; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=432000`"
+              schema: { type: string }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "415": { $ref: "#/components/responses/TipoNoSoportado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+    delete:
+      tags: [Autenticación]
+      operationId: cerrarSesion
+      summary: Cierra la sesión
+      description: Revoca los refresh tokens del usuario (si la cookie es válida) y borra la cookie.
+      security: []
+      responses:
+        "204":
+          description: Cookie borrada.
+          headers:
+            Set-Cookie:
+              description: "`sesion=; Max-Age=0`"
+              schema: { type: string }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/auth/yo:
+    get:
+      tags: [Autenticación]
+      operationId: quienSoy
+      summary: Usuario de la sesión actual
+      responses:
+        "200":
+          description: Usuario autenticado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [usuario]
+                additionalProperties: false
+                properties:
+                  usuario: { $ref: "#/components/schemas/UsuarioSesion" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos:
+    get:
+      tags: [Proyectos]
+      operationId: listarProyectos
+      summary: Mis proyectos
+      description: Solo los proyectos de los que el usuario es miembro, del más nuevo al más viejo.
+      parameters:
+        - { $ref: "#/components/parameters/Limite" }
+        - { $ref: "#/components/parameters/Cursor" }
+      responses:
+        "200":
+          description: Página de proyectos.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaginaProyectos" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+    post:
+      tags: [Proyectos]
+      operationId: crearProyecto
+      summary: Crea un proyecto
+      description: Quien lo crea queda como su único propietario.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CrearProyecto" }
+      responses:
+        "201":
+          description: Proyecto creado.
+          headers:
+            Location:
+              description: Ruta del proyecto nuevo.
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [proyecto]
+                additionalProperties: false
+                properties:
+                  proyecto: { $ref: "#/components/schemas/Proyecto" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "415": { $ref: "#/components/responses/TipoNoSoportado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos/{id}:
+    get:
+      tags: [Proyectos]
+      operationId: verProyecto
+      summary: Un proyecto y el rol del usuario en él
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+      responses:
+        "200":
+          description: El proyecto y el rol del usuario.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [proyecto, rol]
+                additionalProperties: false
+                properties:
+                  proyecto: { $ref: "#/components/schemas/Proyecto" }
+                  rol: { $ref: "#/components/schemas/Rol" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos/{id}/actividad:
+    get:
+      tags: [Actividad]
+      operationId: listarActividad
+      summary: Registro de actividad del proyecto
+      description: |
+        Crear tarea, cambiar el estado de una tarea, comentar y cambiar un rol.
+        Lo más reciente primero. Cualquier miembro puede verlo.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/Limite" }
+        - { $ref: "#/components/parameters/Cursor" }
+      responses:
+        "200":
+          description: Página de registros.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaginaActividad" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos/{id}/invitaciones:
+    post:
+      tags: [Invitaciones]
+      operationId: crearInvitacion
+      summary: Genera un código de invitación
+      description: |
+        Solo el propietario. El código (128 bits aleatorios), el vencimiento
+        (7 días) y el estado «sin usar» los pone el servidor.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CrearInvitacion" }
+      responses:
+        "201":
+          description: Invitación creada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [invitacion]
+                additionalProperties: false
+                properties:
+                  invitacion: { $ref: "#/components/schemas/Invitacion" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "415": { $ref: "#/components/responses/TipoNoSoportado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos/{id}/miembros:
+    get:
+      tags: [Miembros]
+      operationId: listarMiembros
+      summary: Miembros del proyecto con su rol
+      description: Propietarios primero. Cualquier miembro puede verlos.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+      responses:
+        "200":
+          description: Los miembros y el rol del usuario que pregunta.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ListaMiembros" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos/{id}/miembros/{uid}:
+    patch:
+      tags: [Miembros]
+      operationId: cambiarRolMiembro
+      summary: Cambia el rol de un miembro
+      description: Solo el propietario. No se puede degradar al último propietario (409).
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/UidMiembro" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CambiarRol" }
+      responses:
+        "200":
+          description: Proyecto con la membresía actualizada.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [proyecto]
+                additionalProperties: false
+                properties:
+                  proyecto: { $ref: "#/components/schemas/Proyecto" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "409": { $ref: "#/components/responses/Conflicto" }
+        "415": { $ref: "#/components/responses/TipoNoSoportado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+    delete:
+      tags: [Miembros]
+      operationId: quitarMiembro
+      summary: Quita a un miembro del proyecto
+      description: Solo el propietario. No se puede quitar al último propietario (409).
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/UidMiembro" }
+      responses:
+        "204": { description: Miembro quitado. }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "409": { $ref: "#/components/responses/Conflicto" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos/{id}/tareas:
+    get:
+      tags: [Tareas]
+      operationId: listarTareas
+      summary: Tareas del proyecto, con filtros
+      description: |
+        Las más nuevas primero. `mias=1` filtra por el usuario de la sesión y
+        tiene prioridad sobre `responsable`.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/FiltroEstado" }
+        - { $ref: "#/components/parameters/FiltroResponsable" }
+        - { $ref: "#/components/parameters/FiltroMias" }
+        - { $ref: "#/components/parameters/Limite" }
+        - { $ref: "#/components/parameters/Cursor" }
+      responses:
+        "200":
+          description: Página de tareas.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaginaTareas" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+    post:
+      tags: [Tareas]
+      operationId: crearTarea
+      summary: Crea una tarea
+      description: |
+        Propietario y editor; un lector recibe 403. El estado inicial es
+        `pendiente` y el autor y la fecha los pone el servidor.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CrearTarea" }
+      responses:
+        "201":
+          description: Tarea creada.
+          headers:
+            Location:
+              description: Ruta de la tarea nueva.
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RespuestaTarea" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "415": { $ref: "#/components/responses/TipoNoSoportado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos/{id}/tareas/{tid}:
+    get:
+      tags: [Tareas]
+      operationId: verTarea
+      summary: Una tarea
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/TareaId" }
+      responses:
+        "200":
+          description: La tarea.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RespuestaTarea" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+    patch:
+      tags: [Tareas]
+      operationId: actualizarTarea
+      summary: Edita una tarea (cambios parciales)
+      description: |
+        Propietario y editor. Cambiar el `estado` deja un registro en la
+        actividad. El responsable debe ser miembro del proyecto.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/TareaId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ActualizarTarea" }
+      responses:
+        "200":
+          description: La tarea actualizada.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/RespuestaTarea" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "415": { $ref: "#/components/responses/TipoNoSoportado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+    delete:
+      tags: [Tareas]
+      operationId: eliminarTarea
+      summary: Elimina una tarea y sus comentarios
+      description: Propietario y editor.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/TareaId" }
+      responses:
+        "204": { description: Tarea eliminada. }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/proyectos/{id}/tareas/{tid}/comentarios:
+    get:
+      tags: [Comentarios]
+      operationId: listarComentarios
+      summary: Comentarios de una tarea
+      description: Los más antiguos primero. Cualquier miembro puede leerlos.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/TareaId" }
+        - { $ref: "#/components/parameters/Limite" }
+        - { $ref: "#/components/parameters/Cursor" }
+      responses:
+        "200":
+          description: Página de comentarios.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PaginaComentarios" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+    post:
+      tags: [Comentarios]
+      operationId: crearComentario
+      summary: Comenta una tarea
+      description: |
+        Propietario y editor; un lector recibe 403. El autor sale de la sesión
+        y el comentario queda en la actividad.
+      parameters:
+        - { $ref: "#/components/parameters/ProyectoId" }
+        - { $ref: "#/components/parameters/TareaId" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CrearComentario" }
+      responses:
+        "201":
+          description: Comentario creado.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [comentario]
+                additionalProperties: false
+                properties:
+                  comentario: { $ref: "#/components/schemas/Comentario" }
+        "400": { $ref: "#/components/responses/ValidacionFallida" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "415": { $ref: "#/components/responses/TipoNoSoportado" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+  /api/invitaciones/{codigo}/aceptar:
+    post:
+      tags: [Invitaciones]
+      operationId: aceptarInvitacion
+      summary: Acepta una invitación y entra al proyecto
+      description: |
+        Una transacción agrega al usuario de la sesión con el rol de la invitación
+        y la marca como usada. No lleva cuerpo. Una invitación usada (o si ya eres
+        miembro) da 409 y una vencida 410. Si se usó y además venció, 409.
+      parameters:
+        - { $ref: "#/components/parameters/Codigo" }
+      responses:
+        "200":
+          description: Ya eres miembro del proyecto.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/InvitacionAceptada" }
+        "401": { $ref: "#/components/responses/NoAutenticado" }
+        "403": { $ref: "#/components/responses/Prohibido" }
+        "404": { $ref: "#/components/responses/NoEncontrado" }
+        "409": { $ref: "#/components/responses/Conflicto" }
+        "410": { $ref: "#/components/responses/Vencido" }
+        "429": { $ref: "#/components/responses/DemasiadasSolicitudes" }
+        "500": { $ref: "#/components/responses/ErrorInterno" }
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sesion
+      description: Cookie de sesión `HttpOnly` creada por `POST /api/auth/sesion`.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: Firebase ID token
+      description: El `idToken` de Firebase; sirve para probar con Bruno o Postman.
+  parameters:
+    ProyectoId:
+      name: id
+      in: path
+      required: true
+      description: Id del proyecto.
+      schema: { $ref: "#/components/schemas/IdDocumento" }
+    TareaId:
+      name: tid
+      in: path
+      required: true
+      description: Id de la tarea.
+      schema: { $ref: "#/components/schemas/IdDocumento" }
+    UidMiembro:
+      name: uid
+      in: path
+      required: true
+      description: Uid del miembro.
+      schema: { type: string, minLength: 1 }
+    Codigo:
+      name: codigo
+      in: path
+      required: true
+      description: Código de la invitación.
+      schema: { $ref: "#/components/schemas/IdDocumento" }
+    Limite:
+      name: limite
+      in: query
+      required: false
+      description: Máximo de elementos por página.
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    Cursor:
+      name: cursor
+      in: query
+      required: false
+      description: El `siguienteCursor` de la página anterior.
+      schema: { $ref: "#/components/schemas/IdDocumento" }
+    FiltroEstado:
+      name: estado
+      in: query
+      required: false
+      schema: { $ref: "#/components/schemas/EstadoTarea" }
+    FiltroResponsable:
+      name: responsable
+      in: query
+      required: false
+      description: Uid del responsable.
+      schema: { type: string, minLength: 1 }
+    FiltroMias:
+      name: mias
+      in: query
+      required: false
+      description: "`1` para ver solo las tareas del usuario de la sesión."
+      schema: { type: string, enum: ["1"] }
+  responses:
+    ValidacionFallida:
+      description: Datos inválidos (400). `detalles` trae el mensaje de cada campo.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            error: Datos inválidos
+            detalles:
+              - { campo: titulo, mensaje: El título es obligatorio }
+    NoAutenticado:
+      description: Falta la sesión, o es inválida o venció (401).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: Inicia sesión para continuar }
+    Prohibido:
+      description: |
+        Es miembro pero su rol no permite la acción, o el `Origin` de una
+        petición que modifica datos no es del mismo sitio (403).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: No tienes permiso para esta acción }
+    NoEncontrado:
+      description: |
+        No existe, o el usuario no es miembro del proyecto: no se revela cuál
+        de los dos casos es (404).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: Proyecto no encontrado }
+    Conflicto:
+      description: |
+        Choca con el estado actual (409): dejaría el proyecto sin propietario,
+        la invitación ya se usó o ya eres miembro.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: El proyecto debe conservar al menos un propietario }
+    Vencido:
+      description: El recurso existió pero ya no sirve (410), por ejemplo una invitación vencida.
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: Esta invitación venció }
+    TipoNoSoportado:
+      description: El cuerpo debe ser JSON (415).
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: El cuerpo debe ser JSON }
+    DemasiadasSolicitudes:
+      description: Se superó el límite de frecuencia de la ruta (429).
+      headers:
+        Retry-After:
+          description: Segundos que hay que esperar antes de reintentar.
+          schema: { type: integer, minimum: 1 }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example:
+            error: Demasiadas solicitudes. Inténtalo de nuevo en 30 segundos.
+    ErrorInterno:
+      description: Error del servidor (500), sin detalles internos.
+      headers:
+        X-Request-Id:
+          description: Identificador de la petición, para buscarla en los registros.
+          schema: { type: string, format: uuid }
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { error: Error interno del servidor }
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      additionalProperties: false
+      properties:
+        error: { type: string }
+        detalles:
+          type: array
+          items:
+            type: object
+            required: [campo, mensaje]
+            additionalProperties: false
+            properties:
+              campo: { type: string }
+              mensaje: { type: string }
+    IdDocumento:
+      type: string
+      pattern: "^[A-Za-z0-9_-]{1,64}$"
+    Rol:
+      type: string
+      enum: [propietario, editor, lector]
+    EstadoTarea:
+      type: string
+      enum: [pendiente, enProgreso, hecha]
+    Prioridad:
+      type: string
+      enum: [baja, media, alta]
+    UsuarioSesion:
+      type: object
+      required: [uid, correo, rol]
+      additionalProperties: false
+      properties:
+        uid: { type: string }
+        correo: { type: [string, "null"] }
+        rol:
+          type: [string, "null"]
+          description: Rol global (custom claim `rol`), si lo tiene.
+    IniciarSesion:
+      type: object
+      required: [idToken]
+      additionalProperties: false
+      properties:
+        idToken:
+          type: string
+          minLength: 1
+          description: Se obtiene con `getIdToken()` tras iniciar sesión con Firebase.
+    CrearProyecto:
+      type: object
+      required: [nombre]
+      additionalProperties: false
+      properties:
+        nombre: { type: string, minLength: 1, maxLength: 100 }
+    Proyecto:
+      type: object
+      required: [id, nombre, propietarioUid, miembros, miembrosUids, creadoEn]
+      additionalProperties: false
+      properties:
+        id: { $ref: "#/components/schemas/IdDocumento" }
+        nombre: { type: string, minLength: 1, maxLength: 100 }
+        propietarioUid: { type: string }
+        miembros:
+          type: object
+          description: Rol de cada miembro, por uid.
+          additionalProperties: { $ref: "#/components/schemas/Rol" }
+        miembrosUids:
+          type: array
+          items: { type: string }
+        creadoEn: { type: string, format: date-time }
+    ResumenProyecto:
+      type: object
+      required: [id, nombre, creadoEn, rol, totalMiembros]
+      additionalProperties: false
+      properties:
+        id: { $ref: "#/components/schemas/IdDocumento" }
+        nombre: { type: string }
+        creadoEn: { type: string, format: date-time }
+        rol:
+          $ref: "#/components/schemas/Rol"
+          description: El rol del usuario que pregunta.
+        totalMiembros: { type: integer, minimum: 1 }
+    PaginaProyectos:
+      type: object
+      required: [items, siguienteCursor]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ResumenProyecto" }
+        siguienteCursor: { type: [string, "null"] }
+    MiembroVista:
+      type: object
+      required: [uid, rol, correo]
+      additionalProperties: false
+      properties:
+        uid: { type: string }
+        rol: { $ref: "#/components/schemas/Rol" }
+        correo: { type: [string, "null"] }
+    ListaMiembros:
+      type: object
+      required: [rol, items]
+      additionalProperties: false
+      properties:
+        rol:
+          $ref: "#/components/schemas/Rol"
+          description: El rol del usuario que pregunta.
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/MiembroVista" }
+    CambiarRol:
+      type: object
+      required: [rol]
+      additionalProperties: false
+      properties:
+        rol: { $ref: "#/components/schemas/Rol" }
+    Tarea:
+      type: object
+      required:
+        [
+          id,
+          titulo,
+          descripcion,
+          estado,
+          prioridad,
+          responsableUid,
+          vence,
+          creadaPor,
+          creadaEn,
+        ]
+      additionalProperties: false
+      properties:
+        id: { $ref: "#/components/schemas/IdDocumento" }
+        titulo: { type: string, minLength: 1, maxLength: 120 }
+        descripcion: { type: string, maxLength: 2000 }
+        estado: { $ref: "#/components/schemas/EstadoTarea" }
+        prioridad: { $ref: "#/components/schemas/Prioridad" }
+        responsableUid: { type: [string, "null"] }
+        vence:
+          type: [string, "null"]
+          format: date
+          description: Solo el día, `AAAA-MM-DD`.
+        creadaPor: { type: string }
+        creadaEn: { type: string, format: date-time }
+    RespuestaTarea:
+      type: object
+      required: [tarea]
+      additionalProperties: false
+      properties:
+        tarea: { $ref: "#/components/schemas/Tarea" }
+    CrearTarea:
+      type: object
+      required: [titulo]
+      additionalProperties: false
+      description: El estado, el autor y la fecha de creación los decide el servidor.
+      properties:
+        titulo: { type: string, minLength: 1, maxLength: 120 }
+        descripcion: { type: string, maxLength: 2000, default: "" }
+        prioridad:
+          $ref: "#/components/schemas/Prioridad"
+          default: media
+        responsableUid:
+          type: [string, "null"]
+          default: null
+          description: Debe ser miembro del proyecto.
+        vence: { type: [string, "null"], format: date, default: null }
+    ActualizarTarea:
+      type: object
+      minProperties: 1
+      additionalProperties: false
+      properties:
+        titulo: { type: string, minLength: 1, maxLength: 120 }
+        descripcion: { type: string, maxLength: 2000 }
+        estado: { $ref: "#/components/schemas/EstadoTarea" }
+        prioridad: { $ref: "#/components/schemas/Prioridad" }
+        responsableUid:
+          type: [string, "null"]
+          description: Debe ser miembro del proyecto; `null` lo quita.
+        vence: { type: [string, "null"], format: date }
+    PaginaTareas:
+      type: object
+      required: [items, siguienteCursor]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Tarea" }
+        siguienteCursor: { type: [string, "null"] }
+    CrearComentario:
+      type: object
+      required: [texto]
+      additionalProperties: false
+      description: El autor y la fecha los decide el servidor.
+      properties:
+        texto:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Texto plano; no se interpreta como HTML.
+    Comentario:
+      type: object
+      required: [id, uid, texto, creadoEn]
+      additionalProperties: false
+      properties:
+        id: { $ref: "#/components/schemas/IdDocumento" }
+        uid: { type: string }
+        texto: { type: string, minLength: 1, maxLength: 1000 }
+        creadoEn: { type: string, format: date-time }
+    PaginaComentarios:
+      type: object
+      required: [items, siguienteCursor]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Comentario" }
+        siguienteCursor: { type: [string, "null"] }
+    Actividad:
+      type: object
+      required: [id, uid, accion, detalle, creadoEn]
+      additionalProperties: false
+      properties:
+        id: { $ref: "#/components/schemas/IdDocumento" }
+        uid: { type: string, description: Quién hizo el cambio. }
+        accion:
+          type: string
+          enum: [tareaCreada, estadoCambiado, comentarioCreado, rolCambiado]
+        detalle:
+          type: string
+          maxLength: 300
+          example: Cambió el estado de «Maqueta» de Pendiente a Hecha
+        creadoEn: { type: string, format: date-time }
+    PaginaActividad:
+      type: object
+      required: [items, siguienteCursor]
+      additionalProperties: false
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Actividad" }
+        siguienteCursor: { type: [string, "null"] }
+    CrearInvitacion:
+      type: object
+      required: [rol]
+      additionalProperties: false
+      properties:
+        rol:
+          type: string
+          enum: [editor, lector]
+          description: Un propietario se asigna después con el cambio de rol.
+    Invitacion:
+      type: object
+      required: [codigo, proyectoId, rol, expira, usada]
+      additionalProperties: false
+      properties:
+        codigo: { $ref: "#/components/schemas/IdDocumento" }
+        proyectoId: { $ref: "#/components/schemas/IdDocumento" }
+        rol: { $ref: "#/components/schemas/Rol" }
+        expira: { type: string, format: date-time }
+        usada: { type: boolean }
+    InvitacionAceptada:
+      type: object
+      required: [proyectoId, rol]
+      additionalProperties: false
+      properties:
+        proyectoId: { $ref: "#/components/schemas/IdDocumento" }
+        rol: { $ref: "#/components/schemas/Rol" }
