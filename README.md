@@ -68,6 +68,7 @@ Autor: Sergio Stiven Motato
 | `npm run emuladores`   | Levanta Auth y Firestore locales                                                                                              |
 | `npm run test`         | Corre las pruebas con cobertura                                                                                               |
 | `npm run e2e`          | Pruebas de extremo a extremo con Playwright en 360, 768 y 1024 px (necesita `npx playwright install chromium` la primera vez) |
+| `npm run capturas`     | Guarda capturas de `/`, `/login` y `/registro` en 360, 768 y 1024 px en `calidad/capturas/`                                   |
 | `npm run test:hook`    | Pruebas del hook de IA (`scripts/ia/`), con `node:test`                                                                       |
 | `npm run typecheck`    | Revisa los tipos con TypeScript                                                                                               |
 | `npm run lint`         | Revisa el código con ESLint, sin advertencias                                                                                 |
@@ -113,6 +114,8 @@ secretos: las pruebas simulan Firebase y la compilación no se conecta a él.
   768 y 1024 px: sin scroll horizontal y sin violaciones de axe en la portada,
   `/login` y `/registro`. La primera vez hay que descargar el navegador con
   `npx playwright install chromium` (en WSL, `--with-deps`).
+- `npm run capturas` guarda las capturas de pantalla en 360, 768 y 1024 px de
+  las páginas públicas en `calidad/capturas/`.
 - Los retos de excelencia, cómo reproducirlos y su evidencia están en
   [`CALIDAD.md`](CALIDAD.md); lo que falta por entregar, en
   [`calidad/README.md`](calidad/README.md).
