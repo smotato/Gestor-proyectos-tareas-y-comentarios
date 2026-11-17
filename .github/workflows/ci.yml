@@ -45,6 +45,12 @@ jobs:
 
       - name: Compilar
         run: npm run build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: demo-key
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: localhost
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-gestor-proyectos
+          NEXT_PUBLIC_FIREBASE_APP_ID: demo-app
+          FIREBASE_PROJECT_ID: demo-gestor-proyectos
 
       - name: Auditar dependencias
         run: npm audit --audit-level=high
