@@ -9,16 +9,20 @@ export interface DetalleError {
 export class ErrorHttp extends Error {
   readonly status: number;
   readonly detalles: readonly DetalleError[];
+  /** Cabeceras que se agregan a la respuesta de error (por ejemplo `Retry-After`). */
+  readonly cabeceras: Readonly<Record<string, string>>;
 
   constructor(
     status: number,
     mensaje: string,
     detalles: readonly DetalleError[] = [],
+    cabeceras: Readonly<Record<string, string>> = {},
   ) {
     super(mensaje);
     this.name = "ErrorHttp";
     this.status = status;
     this.detalles = detalles;
+    this.cabeceras = cabeceras;
   }
 }
 
@@ -38,6 +42,13 @@ export function noEncontrado(mensaje = "No encontrado") {
 
 export function conflicto(mensaje: string) {
   return new ErrorHttp(409, mensaje);
+}
+
+/** 429, con `Retry-After` en segundos. */
+export function demasiadasSolicitudes(reintentarEnSeg: number) {
+  const mensaje = `Demasiadas solicitudes. Inténtalo de nuevo en ${reintentarEnSeg} segundos.`;
+  const cabeceras = { "Retry-After": String(reintentarEnSeg) };
+  return new ErrorHttp(429, mensaje, [], cabeceras);
 }
 
 /** 410: el recurso existió pero ya no sirve (por ejemplo, una invitación vencida). */

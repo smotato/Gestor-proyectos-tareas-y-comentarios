@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import { COOKIE_SESION, leerCookie } from "./cookies";
 import { ErrorHttp, errorDeValidacion, prohibido } from "./errores";
+import { revisarLimite } from "./limite-frecuencia";
 import { registrarErrorInterno } from "./registro";
 
 type Manejador<C> = (request: Request, contexto: C) => Promise<Response>;
@@ -39,7 +40,8 @@ function respuestaDeError(error: unknown): Response {
       error.detalles.length > 0
         ? { error: error.message, detalles: error.detalles }
         : { error: error.message };
-    return Response.json(cuerpo, { status: error.status });
+    const { status, cabeceras } = error;
+    return Response.json(cuerpo, { status, headers: cabeceras });
   }
   const idPeticion = crypto.randomUUID();
   registrarErrorInterno(idPeticion, error);
@@ -50,14 +52,16 @@ function respuestaDeError(error: unknown): Response {
 }
 
 /**
- * Envoltorio común de los Route Handlers: verifica el Origin, convierte
- * ErrorHttp en `{ error, detalles? }`, oculta los errores internos (500)
- * y marca las respuestas como privadas (`Cache-Control: no-store`).
+ * Envoltorio común de los Route Handlers: limita la frecuencia (429), verifica
+ * el Origin, convierte ErrorHttp en `{ error, detalles? }`, oculta los errores
+ * internos (500) y marca las respuestas como privadas (`Cache-Control: no-store`).
  */
 export function manejar<C>(handler: Manejador<C>): Manejador<C> {
   return async (request, contexto) => {
     let respuesta: Response;
     try {
+      const excedido = revisarLimite(request);
+      if (excedido) throw excedido;
       verificarOrigen(request);
       respuesta = await handler(request, contexto);
     } catch (error) {
