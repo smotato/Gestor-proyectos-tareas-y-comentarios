@@ -10,6 +10,8 @@ const PUERTO = 3100;
  */
 export default defineConfig({
   testDir: "./e2e",
+  // Las capturas tienen su propio comando: `npm run capturas`.
+  testIgnore: "**/capturas/**",
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 1 : 0,
