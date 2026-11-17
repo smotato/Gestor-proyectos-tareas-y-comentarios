@@ -1,0 +1,7 @@
+/* Invitaciones: el código y el enlace se pueden seleccionar y se parten si no caben. */
+
+.codigo {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  overflow-wrap: anywhere;
+  user-select: all;
+}

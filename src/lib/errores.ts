@@ -40,6 +40,11 @@ export function conflicto(mensaje: string) {
   return new ErrorHttp(409, mensaje);
 }
 
+/** 410: el recurso existió pero ya no sirve (por ejemplo, una invitación vencida). */
+export function vencido(mensaje: string) {
+  return new ErrorHttp(410, mensaje);
+}
+
 export function errorDeCampo(campo: string, mensaje: string): ErrorHttp {
   return new ErrorHttp(400, MENSAJE_VALIDACION, [{ campo, mensaje }]);
 }

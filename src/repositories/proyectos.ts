@@ -8,7 +8,13 @@ import { datosDeActividad, refActividad } from "./actividad";
 
 const coleccion = () => firestoreAdmin().collection("proyectos");
 
-function aProyecto(id: string, datos: DocumentData | undefined): Proyecto {
+/** Referencia del proyecto, para escribirlo dentro de transacciones de otros repositorios. */
+export const refProyecto = (id: string) => coleccion().doc(id);
+
+export function aProyecto(
+  id: string,
+  datos: DocumentData | undefined,
+): Proyecto {
   return ProyectoSchema.parse({ ...datos, id });
 }
 

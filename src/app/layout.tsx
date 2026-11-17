@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { EnlacesInvitado, MenuSesion } from "@/components/MenuSesion";
 import "./globals.css";
+import "./invitaciones.css";
 import "./proyectos.css";
 import "./tareas.css";
 
