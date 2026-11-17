@@ -1,8 +1,10 @@
 import { leerFiltros, urlConFiltros } from "@/lib/filtros-tareas";
-import { proyectoDelUsuario } from "@/lib/proyectos-servidor";
+import {
+  miembrosDelProyecto,
+  proyectoDelUsuario,
+} from "@/lib/proyectos-servidor";
 import { listarTareas } from "@/services/gestion-tareas";
 import { puede } from "@/services/permisos";
-import { miembrosConCorreo } from "@/services/proyectos";
 import { BarraFiltros } from "./BarraFiltros";
 import { TableroTareas } from "./TableroTareas";
 
@@ -25,7 +27,7 @@ export async function PanelTareas({ params, searchParams }: PropsPanel) {
   const { usuario, proyecto, rol } = await proyectoDelUsuario(id);
   const [pagina, vistas] = await Promise.all([
     listarTareas(proyecto, usuario.uid, { ...filtros, limite: LIMITE_TABLERO }),
-    miembrosConCorreo(proyecto),
+    miembrosDelProyecto(id),
   ]);
   const miembros = vistas.map((m) => ({
     uid: m.uid,

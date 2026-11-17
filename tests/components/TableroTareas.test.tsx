@@ -85,6 +85,10 @@ describe("TableroTareas · lector", () => {
     expect(within(columna(/Pendiente/)).getByText("Maqueta")).toBeVisible();
     expect(within(columna(/Hecha/)).getByText("Informe")).toBeVisible();
     expect(screen.getByText("bea@ejemplo.com")).toBeVisible();
+    expect(screen.getByRole("link", { name: "Maqueta" })).toHaveAttribute(
+      "href",
+      "/proyectos/p1/tareas/t1",
+    );
     expect(screen.queryByRole("button", { name: /nueva tarea/i })).toBeNull();
     expect(screen.queryByRole("button", { name: /editar/i })).toBeNull();
     expect(screen.queryByRole("combobox")).toBeNull();

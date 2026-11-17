@@ -22,6 +22,7 @@ interface PropsTablero {
 }
 
 interface PropsColumnas {
+  proyectoId: string;
   tareas: Tarea[];
   nombres: ReadonlyMap<string, string>;
   puedeEditar: boolean;
@@ -29,7 +30,7 @@ interface PropsColumnas {
   onCambiarEstado: (tarea: Tarea, estado: EstadoTarea) => void;
 }
 
-function Columnas({ tareas, nombres, ...acciones }: PropsColumnas) {
+function Columnas({ proyectoId, tareas, nombres, ...acciones }: PropsColumnas) {
   return (
     <div className="tablero">
       {ESTADOS_TAREA.map((estado) => {
@@ -54,6 +55,7 @@ function Columnas({ tareas, nombres, ...acciones }: PropsColumnas) {
                     responsable={
                       nombres.get(tarea.responsableUid ?? "") ?? null
                     }
+                    rutaDetalle={`/proyectos/${proyectoId}/tareas/${tarea.id}`}
                     {...acciones}
                   />
                 ))}
@@ -114,6 +116,7 @@ export function TableroTareas(props: PropsTablero) {
         <SinTareas hayFiltros={props.hayFiltros} ruta={props.rutaSinFiltros} />
       ) : (
         <Columnas
+          proyectoId={props.proyectoId}
           tareas={visibles}
           nombres={nombres}
           puedeEditar={props.puedeEditar}

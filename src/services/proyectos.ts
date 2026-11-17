@@ -10,6 +10,7 @@ import { ConsultaListaSchema, ID_DOCUMENTO } from "@/schemas/lista";
 import { CambiarRolSchema, type Miembros } from "@/schemas/miembro";
 import { CrearProyectoSchema, type Proyecto } from "@/schemas/proyecto";
 import type { Rol } from "@/schemas/rol";
+import { detalleRol, nuevaActividad } from "./actividad";
 import { puedeCambiarRolDe, puedeQuitarMiembro } from "./permisos";
 
 const RANGO: Readonly<Record<Rol, number>> = {
@@ -163,7 +164,17 @@ export async function cambiarRolMiembro(
   const resultado = CambiarRolSchema.safeParse(entrada);
   if (!resultado.success) throw errorDeValidacion(resultado.error);
   const nuevoRol = resultado.data.rol;
-  return repo.modificarMembresia(proyectoId, (actual) => {
+  const correos = await correosPorUid([objetivoUid]);
+  const quien = correos.get(objetivoUid) ?? objetivoUid;
+  const registrar = (antes: Proyecto, despues: Proyecto) =>
+    antes.miembros[objetivoUid] === despues.miembros[objetivoUid]
+      ? null
+      : nuevaActividad(
+          { proyectoId, uid: actorUid, ahora: new Date() },
+          "rolCambiado",
+          detalleRol(quien, nuevoRol),
+        );
+  const cambio = (actual: Proyecto | null) => {
     const proyecto = validarEnTransaccion(actual, actorUid, objetivoUid);
     if (!puedeCambiarRolDe(proyecto.miembros, objetivoUid, nuevoRol)) {
       throw conflicto(ULTIMO_PROPIETARIO);
@@ -172,7 +183,8 @@ export async function cambiarRolMiembro(
       ...proyecto.miembros,
       [objetivoUid]: nuevoRol,
     });
-  });
+  };
+  return repo.modificarMembresia(proyectoId, cambio, registrar);
 }
 
 export async function quitarMiembro(

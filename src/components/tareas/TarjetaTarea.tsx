@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   ETIQUETA_ESTADO,
   ETIQUETA_PRIORIDAD,
@@ -14,6 +15,8 @@ import {
 
 interface PropsTarjeta {
   tarea: Tarea;
+  /** Página de detalle con los comentarios. */
+  rutaDetalle: string;
   /** Nombre del responsable (`null` si no tiene). */
   responsable: string | null;
   puedeEditar: boolean;
@@ -52,7 +55,7 @@ export function TarjetaTarea(props: PropsTarjeta) {
   return (
     <li className="tarea">
       <h4 id={`titulo-${tarea.id}`} className="tarea__titulo">
-        {tarea.titulo}
+        <Link href={props.rutaDetalle}>{tarea.titulo}</Link>
       </h4>
       <dl className="tarea__datos">
         <dt>Prioridad</dt>

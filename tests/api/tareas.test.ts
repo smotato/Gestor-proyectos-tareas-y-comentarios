@@ -20,6 +20,8 @@ const repo = vi.hoisted(() => ({
   guardarTareaNueva: vi.fn(),
 }));
 vi.mock("@/repositories/tareas", () => repo);
+const actividad = vi.hoisted(() => ({ nuevoIdActividad: vi.fn() }));
+vi.mock("@/repositories/actividad", () => actividad);
 
 import { GET, POST } from "@/app/api/proyectos/[id]/tareas/route";
 import {
@@ -46,6 +48,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   proyectos.obtenerProyecto.mockResolvedValue(proyectoDePrueba());
   repo.nuevoIdTarea.mockReturnValue("t9");
+  actividad.nuevoIdActividad.mockReturnValue("a1");
 });
 
 describe("POST /api/proyectos/:id/tareas · permisos", () => {
@@ -76,6 +79,12 @@ describe("POST /api/proyectos/:id/tareas · permisos", () => {
         prioridad: "alta",
         estado: "pendiente",
         creadaPor: "u2",
+      }),
+      expect.objectContaining({
+        id: "a1",
+        uid: "u2",
+        accion: "tareaCreada",
+        detalle: "Creó la tarea «Maqueta»",
       }),
     );
   });

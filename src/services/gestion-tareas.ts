@@ -4,6 +4,7 @@ import { ConsultaTareasSchema } from "@/schemas/consulta-tareas";
 import { ID_DOCUMENTO } from "@/schemas/lista";
 import type { Proyecto } from "@/schemas/proyecto";
 import type { Tarea } from "@/schemas/tarea";
+import { detalleEstado, detalleTareaCreada, nuevaActividad } from "./actividad";
 import { exigirPermiso } from "./permisos";
 import { requerirMiembro } from "./proyectos";
 import { aplicarCambiosTarea, prepararTareaNueva } from "./tareas";
@@ -63,7 +64,12 @@ export async function crearTarea(
     entrada,
     ahora,
   });
-  await repo.guardarTareaNueva(proyecto.id, tarea);
+  const actividad = nuevaActividad(
+    { proyectoId: proyecto.id, uid: actorUid, ahora },
+    "tareaCreada",
+    detalleTareaCreada(tarea.titulo),
+  );
+  await repo.guardarTareaNueva(proyecto.id, tarea, actividad);
   return tarea;
 }
 
@@ -72,18 +78,32 @@ export async function actualizarTarea(
   actorUid: string,
   id: string,
   cambios: unknown,
+  ahora: Date = new Date(),
 ): Promise<Tarea> {
   exigirPermiso(proyecto.miembros, actorUid, "editar");
   validarIdTarea(id);
-  return repo.modificarTarea(proyecto.id, id, (actual) => {
-    if (!actual) throw noEncontrado(TAREA_NO_ENCONTRADA);
-    return aplicarCambiosTarea({
-      actorUid,
-      miembros: proyecto.miembros,
-      tarea: actual,
-      cambios,
-    });
-  });
+  const registrarCambioDeEstado = (antes: Tarea, despues: Tarea) =>
+    antes.estado === despues.estado
+      ? null
+      : nuevaActividad(
+          { proyectoId: proyecto.id, uid: actorUid, ahora },
+          "estadoCambiado",
+          detalleEstado(despues.titulo, antes.estado, despues.estado),
+        );
+  return repo.modificarTarea(
+    proyecto.id,
+    id,
+    (actual) => {
+      if (!actual) throw noEncontrado(TAREA_NO_ENCONTRADA);
+      return aplicarCambiosTarea({
+        actorUid,
+        miembros: proyecto.miembros,
+        tarea: actual,
+        cambios,
+      });
+    },
+    registrarCambioDeEstado,
+  );
 }
 
 export async function eliminarTarea(

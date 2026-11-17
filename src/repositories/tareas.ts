@@ -1,6 +1,8 @@
 import type { DocumentData } from "firebase-admin/firestore";
 import { firestoreAdmin } from "@/lib/firebase/admin";
+import type { Actividad } from "@/schemas/actividad";
 import { type EstadoTarea, type Tarea, TareaSchema } from "@/schemas/tarea";
+import { datosDeActividad, refActividad } from "./actividad";
 
 /** Único acceso a `proyectos/{id}/tareas/{tid}`. Valida lo que lee con Zod. */
 
@@ -65,25 +67,44 @@ export async function listarTareas(
   };
 }
 
-/** `create()` falla si el id ya existe (no sobrescribe). */
+/**
+ * Guarda la tarea y su registro de actividad en un solo lote.
+ * `create()` falla si el id ya existe (no sobrescribe).
+ */
 export async function guardarTareaNueva(
   proyectoId: string,
   tarea: Tarea,
+  actividad: Actividad,
 ): Promise<void> {
-  await coleccion(proyectoId).doc(tarea.id).create(datosDeTarea(tarea));
+  const lote = firestoreAdmin().batch();
+  lote.create(coleccion(proyectoId).doc(tarea.id), datosDeTarea(tarea));
+  lote.create(refActividad(proyectoId, actividad), datosDeActividad(actividad));
+  await lote.commit();
 }
 
-/** Lee y escribe en una transacción; `cambio` puede lanzar ErrorHttp para abortar. */
+/**
+ * Lee y escribe en una transacción; `cambio` puede lanzar ErrorHttp para abortar.
+ * Si `registrar` devuelve un registro, se escribe en la misma transacción.
+ */
 export async function modificarTarea(
   proyectoId: string,
   id: string,
   cambio: (actual: Tarea | null) => Tarea,
+  registrar?: (antes: Tarea, despues: Tarea) => Actividad | null,
 ): Promise<Tarea> {
   const ref = coleccion(proyectoId).doc(id);
   return firestoreAdmin().runTransaction(async (tx) => {
     const snap = await tx.get(ref);
-    const nueva = cambio(snap.exists ? aTarea(snap.id, snap.data()) : null);
+    const antes = snap.exists ? aTarea(snap.id, snap.data()) : null;
+    const nueva = cambio(antes);
     tx.set(ref, datosDeTarea(nueva));
+    const actividad = antes ? registrar?.(antes, nueva) : null;
+    if (actividad) {
+      tx.create(
+        refActividad(proyectoId, actividad),
+        datosDeActividad(actividad),
+      );
+    }
     return nueva;
   });
 }
