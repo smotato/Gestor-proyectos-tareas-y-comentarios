@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { SIN_INDEXAR } from "@/lib/seo";
 import { Suspense } from "react";
 import { Esqueleto } from "@/components/Esqueleto";
 import { SeccionInvitar } from "@/components/invitaciones/SeccionInvitar";
 import { ListaMiembros } from "@/components/proyectos/ListaMiembros";
 
-export const metadata: Metadata = { title: "Miembros del proyecto" };
+export const metadata: Metadata = {
+  title: "Miembros del proyecto",
+  robots: SIN_INDEXAR,
+};
 
 export default function PaginaMiembros({
   params,

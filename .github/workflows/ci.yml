@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# Una ejecución nueva cancela la anterior de la misma rama o PR.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # `npm ci` ejecuta `prepare` (husky): en CI no hacen falta los hooks de git.
+  HUSKY: "0"
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  calidad:
+    name: Calidad, compilación y auditoría
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Preparar Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Tipos, lint, formato y pruebas
+        run: npm run check
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Auditar dependencias
+        run: npm audit --audit-level=high

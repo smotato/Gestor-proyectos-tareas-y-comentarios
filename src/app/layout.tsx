@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import { Suspense } from "react";
 import { EnlacesInvitado, MenuSesion } from "@/components/MenuSesion";
+import { metadatosDelSitio } from "@/lib/seo";
 import "./globals.css";
 import "./invitaciones.css";
 import "./proyectos.css";
@@ -18,14 +19,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Gestor de proyectos",
-    template: "%s · Gestor de proyectos",
-  },
-  description:
-    "Proyectos con miembros, tareas asignadas, estados y comentarios, con permisos por rol.",
-};
+export const metadata: Metadata = metadatosDelSitio();
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

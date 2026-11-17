@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FormularioCredenciales } from "@/components/FormularioCredenciales";
 
-export const metadata: Metadata = { title: "Iniciar sesión" };
+export const metadata: Metadata = {
+  title: "Iniciar sesión",
+  description:
+    "Inicia sesión con tu correo y contraseña para ver tus proyectos y tareas.",
+};
 
 export default function PaginaLogin() {
   return (

@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { SIN_INDEXAR } from "@/lib/seo";
 import { Suspense } from "react";
 import { Esqueleto } from "@/components/Esqueleto";
 import { FormularioNuevoProyecto } from "@/components/proyectos/FormularioNuevoProyecto";
 import { ListaProyectos } from "@/components/proyectos/ListaProyectos";
 
-export const metadata: Metadata = { title: "Mis proyectos" };
+export const metadata: Metadata = {
+  title: "Mis proyectos",
+  robots: SIN_INDEXAR,
+};
 
 /**
  * La lista verifica la sesión en el servidor (el proxy solo redirige si falta

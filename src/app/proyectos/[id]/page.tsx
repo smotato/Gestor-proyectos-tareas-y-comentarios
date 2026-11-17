@@ -1,10 +1,14 @@
 import type { Metadata } from "next";
+import { SIN_INDEXAR } from "@/lib/seo";
 import { Suspense } from "react";
 import { PanelActividad } from "@/components/actividad/PanelActividad";
 import { Esqueleto } from "@/components/Esqueleto";
 import { PanelTareas } from "@/components/tareas/PanelTareas";
 
-export const metadata: Metadata = { title: "Tareas del proyecto" };
+export const metadata: Metadata = {
+  title: "Tareas del proyecto",
+  robots: SIN_INDEXAR,
+};
 
 interface PropsPagina {
   params: Promise<{ id: string }>;

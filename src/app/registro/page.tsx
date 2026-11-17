@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { FormularioCredenciales } from "@/components/FormularioCredenciales";
 
-export const metadata: Metadata = { title: "Crear cuenta" };
+export const metadata: Metadata = {
+  title: "Crear cuenta",
+  description:
+    "Crea una cuenta para organizar proyectos, tareas y comentarios con tu equipo.",
+};
 
 export default function PaginaRegistro() {
   return (

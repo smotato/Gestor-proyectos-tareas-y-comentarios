@@ -1,4 +1,11 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: { absolute: "Gestor de proyectos · Organiza el trabajo de tu equipo" },
+  description:
+    "Crea proyectos, reparte tareas con responsable y fecha, comenta y sigue la actividad de tu equipo de clase.",
+};
 
 export default function Inicio() {
   return (
