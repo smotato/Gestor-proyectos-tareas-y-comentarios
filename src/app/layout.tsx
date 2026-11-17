@@ -8,6 +8,7 @@ import "./globals.css";
 import "./invitaciones.css";
 import "./proyectos.css";
 import "./tareas.css";
+import "./contraste.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

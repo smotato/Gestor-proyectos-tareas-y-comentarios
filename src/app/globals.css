@@ -30,6 +30,39 @@
   }
 }
 
+/*
+ * Alto contraste (prefers-contrast: more): texto a 7:1 o más y controles a
+ * 4,5:1 o más, en claro y en oscuro. El bloque "oscuro + alto contraste" va
+ * después y repite todos los tokens, para que no se cuelen los del claro.
+ */
+@media (prefers-contrast: more) {
+  :root {
+    --fondo: #ffffff;
+    --superficie: #ffffff;
+    --texto: #000000;
+    --texto-tenue: #3f3f46;
+    --borde: #27272a;
+    --acento: #1e3a8a;
+    --acento-texto: #ffffff;
+    --error: #7f1d1d;
+    --foco: #1e3a8a;
+  }
+}
+
+@media (prefers-color-scheme: dark) and (prefers-contrast: more) {
+  :root {
+    --fondo: #000000;
+    --superficie: #000000;
+    --texto: #ffffff;
+    --texto-tenue: #e4e4e7;
+    --borde: #e4e4e7;
+    --acento: #bfdbfe;
+    --acento-texto: #000000;
+    --error: #fecaca;
+    --foco: #ffffff;
+  }
+}
+
 *,
 *::before,
 *::after {

@@ -1,0 +1,49 @@
+/*
+ * Ajustes de contraste que no son colores. Se carga al final (después de
+ * tareas.css) para ganar a los bordes de 1 px de cada componente.
+ */
+
+/* Alto contraste: bordes más gruesos y foco más grande. */
+@media (prefers-contrast: more) {
+  .tarea,
+  .comentario,
+  .actividad__item,
+  .tarjeta-borde,
+  .lista-tarjetas__item,
+  .dialogo,
+  .campo input,
+  .campo select,
+  .campo textarea,
+  .tarea__estado select,
+  .acciones-miembro__rol select {
+    border-width: 2px;
+  }
+
+  :focus-visible {
+    outline-width: 4px;
+  }
+}
+
+/*
+ * Colores forzados (modo de alto contraste de Windows): el navegador ignora
+ * los colores propios, así que lo que solo se distinguía por el fondo necesita
+ * un borde, y el foco usa el color del sistema.
+ */
+@media (forced-colors: active) {
+  .boton {
+    border: 2px solid ButtonText;
+  }
+
+  :focus-visible {
+    outline: 3px solid Highlight;
+  }
+
+  .esqueleto__linea {
+    border: 1px solid CanvasText;
+  }
+
+  .pestanas a[aria-current="page"] {
+    border-bottom-color: Highlight;
+    text-decoration: underline;
+  }
+}
