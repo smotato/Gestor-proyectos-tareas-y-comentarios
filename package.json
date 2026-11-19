@@ -64,6 +64,9 @@
     "*.{js,mjs,json,md,css}": "prettier --write"
   },
   "overrides": {
-    "@grpc/grpc-js": "^1.14.0"
+    "@grpc/grpc-js": "^1.14.0",
+    "jwks-rsa": {
+      "jose": "^4.15.9"
+    }
   }
 }
