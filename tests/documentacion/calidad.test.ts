@@ -2,6 +2,14 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import {
+  auditoria,
+  informesPorPagina,
+  type InformeLighthouse,
+  leerInforme,
+  nota,
+  valorMostrado,
+} from "./informes-lighthouse";
 
 const RAIZ = process.cwd();
 const leer = (ruta: string) => readFileSync(join(RAIZ, ruta), "utf8");
@@ -10,6 +18,74 @@ const calidad = leer("CALIDAD.md");
 const lineasDe = (texto: string) => texto.split("\n");
 const aparicionesDe = (texto: string, palabra: string) =>
   texto.split(palabra).length - 1;
+
+const celdas = (fila: string) =>
+  fila
+    .split("|")
+    .slice(1, -1)
+    .map((c) => c.trim());
+const sinNegrita = (texto: string) => texto.replaceAll("**", "");
+
+// Metas de 14.1: Rendimiento ≥ 90 y las otras tres ≥ 95.
+const CATEGORIAS = [
+  ["performance", 90],
+  ["accessibility", 95],
+  ["best-practices", 95],
+  ["seo", 95],
+] as const;
+const DISPOSITIVOS: Record<string, string> = {
+  Móvil: "mobile",
+  Escritorio: "desktop",
+};
+
+/** Una fila de la tabla de §3: sus 4 notas deben ser las del informe enlazado. */
+function comprobarFilaLighthouse(fila: string) {
+  const [pagina = "", , dispositivo = "", ...resto] = celdas(fila);
+  const archivo = /\((calidad\/lighthouse\/[^)]+\.html)\)/.exec(fila)?.[1];
+  expect(archivo, `la fila no enlaza un informe: ${fila}`).toBeDefined();
+  const informe = leerInforme(archivo ?? "");
+  expect(new URL(informe.finalDisplayedUrl).pathname).toBe(
+    pagina.replaceAll("`", ""),
+  );
+  expect(informe.configSettings.formFactor).toBe(DISPOSITIVOS[dispositivo]);
+  CATEGORIAS.forEach(([categoria, meta], i) => {
+    const real = nota(informe, categoria);
+    const marca = real >= meta ? "✓" : "✗";
+    expect(sinNegrita(resto[i] ?? ""), `${archivo} · ${categoria}`).toBe(
+      `${real} ${marca}`,
+    );
+  });
+}
+
+// Metas de 14.1 (TBT es la aproximación de INP en laboratorio).
+const METRICAS = [
+  ["largest-contentful-paint", 1, 2500],
+  ["cumulative-layout-shift", 2, 0.1],
+  ["total-blocking-time", 3, 200],
+] as const;
+
+/** Una fila de la tabla de §7: «móvil y escritorio» + marca de la meta. */
+function comprobarMetricasDePagina(
+  fila: string[],
+  pagina: string,
+  informes: Map<string, InformeLighthouse>,
+) {
+  const movil = informes.get(`${pagina}|mobile`);
+  const escritorio = informes.get(`${pagina}|desktop`);
+  expect(movil, `falta el informe móvil de ${pagina}`).toBeDefined();
+  expect(
+    escritorio,
+    `falta el informe de escritorio de ${pagina}`,
+  ).toBeDefined();
+  if (!movil || !escritorio) return;
+  for (const [id, columna, maximo] of METRICAS) {
+    const cumple =
+      (auditoria(movil, id).numericValue ?? Infinity) <= maximo &&
+      (auditoria(escritorio, id).numericValue ?? Infinity) <= maximo;
+    const esperado = `${valorMostrado(movil, id)} y ${valorMostrado(escritorio, id)} ${cumple ? "✓" : "✗"}`;
+    expect(fila[columna], `${pagina} · ${id}`).toBe(esperado);
+  }
+}
 
 /** Texto de la sección «## <n>. …» hasta la siguiente. */
 function seccion(numero: number): string {
@@ -60,7 +136,7 @@ describe("CALIDAD.md · estructura (sección 14.6)", () => {
         !l.includes("Requisito de 14.6"),
     );
     expect(filas).toHaveLength(10);
-    for (const fila of filas) expect(fila).toMatch(/Hecho|Pendiente/);
+    for (const fila of filas) expect(fila).toMatch(/Hecho|Pendiente|Parcial/);
   });
 });
 
@@ -91,7 +167,7 @@ describe("CALIDAD.md · integración continua y cobertura", () => {
 });
 
 describe("CALIDAD.md · mediciones sin cifras inventadas", () => {
-  it("Lighthouse: 3 páginas en móvil y escritorio, con las metas y todo PENDIENTE", () => {
+  it("Lighthouse: 3 páginas en móvil y escritorio, con las metas y las notas de cada informe", () => {
     const lighthouse = seccion(3);
     expect(lighthouse).toContain("≥ 90");
     expect(lighthouse).toContain("≥ 95");
@@ -100,9 +176,7 @@ describe("CALIDAD.md · mediciones sin cifras inventadas", () => {
       (l) => l.startsWith("|") && l.includes("calidad/lighthouse/"),
     );
     expect(filas).toHaveLength(6);
-    for (const fila of filas) {
-      expect(aparicionesDe(fila, "PENDIENTE")).toBe(4);
-    }
+    for (const fila of filas) comprobarFilaLighthouse(fila);
     for (const pagina of ["`/`", "`/login`", "`/proyectos`"]) {
       expect(lighthouse).toContain(pagina);
     }
@@ -110,15 +184,25 @@ describe("CALIDAD.md · mediciones sin cifras inventadas", () => {
     expect(lighthouse.replace(/\s+/g, " ")).toContain("Clear storage");
   });
 
-  it("Core Web Vitals: LCP, INP y CLS con antes, después y qué se hizo", () => {
+  it("Core Web Vitals: LCP, CLS y TBT salen de los informes; INP sigue PENDIENTE; «antes» no se midió", () => {
     const vitals = seccion(7);
     for (const columna of ["Antes", "Después", "Qué se hizo"]) {
       expect(vitals).toContain(columna);
     }
+    const informes = informesPorPagina();
+    for (const pagina of ["/", "/login", "/proyectos"]) {
+      const fila = lineasDe(vitals).find(
+        (l) => celdas(l)[0] === `\`${pagina}\``,
+      );
+      expect(fila, `falta la fila de ${pagina}`).toBeDefined();
+      comprobarMetricasDePagina(celdas(fila ?? ""), pagina, informes);
+    }
     for (const metrica of ["LCP", "INP", "CLS"]) {
       const fila = lineasDe(vitals).find((l) => l.startsWith(`| ${metrica} `));
-      expect(aparicionesDe(fila ?? "", "PENDIENTE")).toBe(3);
+      expect(celdas(fila ?? "")[2]).toContain("No se midió");
     }
+    const inp = lineasDe(vitals).find((l) => l.startsWith("| INP "));
+    expect(aparicionesDe(inp ?? "", "PENDIENTE")).toBeGreaterThanOrEqual(1);
     expect(vitals).toContain("Interactions");
   });
 

@@ -266,9 +266,11 @@ Cada celda es móvil y escritorio.
 Se cumplen todas las metas de LCP, CLS y TBT (el TBT es la aproximación de INP
 en laboratorio).
 
-| Métrica                            | Meta     | Resultado                                                       |
-| ---------------------------------- | -------- | --------------------------------------------------------------- |
-| INP (respuesta a cada interacción) | ≤ 200 ms | **PENDIENTE**: Lighthouse no lo mide en laboratorio (ver abajo) |
+| Métrica                             | Meta     | Antes       | Después                                                         | Qué se hizo                       |
+| ----------------------------------- | -------- | ----------- | --------------------------------------------------------------- | --------------------------------- |
+| LCP (carga del contenido principal) | ≤ 2,5 s  | No se midió | Ver la tabla por página, arriba                                 | Nada que atribuir: no hay «antes» |
+| INP (respuesta a cada interacción)  | ≤ 200 ms | No se midió | **PENDIENTE**: Lighthouse no lo mide en laboratorio (ver abajo) | PENDIENTE                         |
+| CLS (saltos de diseño)              | ≤ 0,1    | No se midió | Ver la tabla por página, arriba                                 | Nada que atribuir: no hay «antes» |
 
 **Sin «antes» y «después».** No se midió antes del rediseño, así que no hay
 cifras previas con las que comparar y no se atribuye ninguna mejora a un cambio
