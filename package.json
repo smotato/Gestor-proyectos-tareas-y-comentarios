@@ -50,7 +50,7 @@
     "vitest": "^5.1.0"
   },
   "engines": {
-    "node": ">=24.12.0"
+    "node": "24.x"
   },
   "allowScripts": {
     "@firebase/util@1.15.3": true,
