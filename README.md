@@ -239,3 +239,7 @@ Dos retos más refuerzan esas reglas: un **hook** propio
 bloquea leer `.env*`, salir del proyecto o usar `curl`, `wget` y `sudo`, y un
 **subagente revisor** de solo lectura (`ia/propuestas/revisor.md`). Cómo se
 registran y se comprueban está en [`ia/CONFIGURACION.md`](ia/CONFIGURACION.md).
+
+## Producción
+
+Aplicación desplegada en Vercel: https://gestor-proyectos-tareas-y-comentari.vercel.app
