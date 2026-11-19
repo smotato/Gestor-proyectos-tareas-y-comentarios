@@ -92,7 +92,7 @@ describe("axe · diálogo de tarea y filtros", () => {
     const { container } = render(tablero({ crear: true, editar: true }));
     await userEvent.click(screen.getByRole("button", { name: "Nueva tarea" }));
     const ventana = screen.getByRole("dialog", { name: "Nueva tarea" });
-    await userEvent.click(screen.getByRole("button", { name: "Guardar" }));
+    await userEvent.click(screen.getByRole("button", { name: "Crear tarea" }));
     expect(ventana).toBeVisible();
     expect(screen.getByLabelText("Título")).toHaveAttribute(
       "aria-invalid",

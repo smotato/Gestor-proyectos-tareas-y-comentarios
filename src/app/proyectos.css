@@ -11,9 +11,11 @@
 
 .tarjeta-borde,
 .lista-tarjetas__item {
-  padding: 1rem;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
+  padding: var(--e-4);
+  border: 1px solid var(--divisor);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
 }
 
 .lista-tarjetas {
@@ -22,6 +24,13 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.proyecto__datos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--e-2) var(--e-3);
 }
 
 .lista-tarjetas__item > * {
@@ -34,22 +43,6 @@
   overflow-wrap: anywhere;
 }
 
-.vacio {
-  padding: 1rem;
-  border: 1px dashed var(--borde);
-  border-radius: var(--radio);
-  color: var(--texto-tenue);
-}
-
-.encabezado-proyecto {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.encabezado-proyecto > * {
-  margin: 0;
-}
-
 .pestanas {
   display: flex;
   flex-wrap: wrap;
@@ -57,7 +50,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border-bottom: 1px solid var(--borde);
+  border-bottom: 1px solid var(--divisor);
 }
 
 .pestanas a {
@@ -91,7 +84,7 @@
   padding: 0.5rem;
   border: 1px solid var(--borde);
   border-radius: var(--radio);
-  background: var(--fondo);
+  background: var(--superficie);
   color: var(--texto);
   font: inherit;
 }
@@ -108,9 +101,6 @@
 
 .boton--peligro {
   justify-self: start;
-  border-color: var(--error);
-  background: transparent;
-  color: var(--error);
 }
 
 @media (min-width: 48rem) {
@@ -122,5 +112,98 @@
 @media (min-width: 64rem) {
   .lista-tarjetas {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/*
+ * Tabla de miembros. Mobile-first: cada fila se apila como una tarjeta con la
+ * etiqueta de cada dato; desde 48 rem vuelve a ser una tabla.
+ */
+.tabla,
+.tabla tbody,
+.tabla tr,
+.tabla th,
+.tabla td {
+  display: block;
+}
+
+.tabla thead {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.tabla tr {
+  margin-bottom: var(--e-3);
+  padding: var(--e-2) var(--e-4);
+  border: 1px solid var(--divisor);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+}
+
+.tabla th,
+.tabla td {
+  padding: var(--e-2) 0;
+  text-align: start;
+  overflow-wrap: anywhere;
+}
+
+.tabla [data-etiqueta]::before {
+  content: attr(data-etiqueta);
+  display: block;
+  color: var(--texto-tenue);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+}
+
+@media (min-width: 48rem) {
+  .tabla {
+    display: table;
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--superficie);
+  }
+
+  .tabla thead {
+    display: table-header-group;
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+  }
+
+  .tabla tbody {
+    display: table-row-group;
+  }
+
+  .tabla tr {
+    display: table-row;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .tabla th,
+  .tabla td {
+    display: table-cell;
+    padding: var(--e-3) var(--e-4);
+    border-bottom: 1px solid var(--divisor);
+    vertical-align: top;
+  }
+
+  .tabla thead th {
+    color: var(--texto-tenue);
+    font-size: var(--texto-sm);
+  }
+
+  .tabla [data-etiqueta]::before {
+    content: none;
   }
 }

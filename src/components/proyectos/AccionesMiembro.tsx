@@ -1,7 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useCallback, useState } from "react";
+import { Boton } from "@/components/ui/Boton";
+import { Dialogo } from "@/components/ui/Dialogo";
 import { mensajeDeError, pedirApi } from "@/lib/api-cliente";
 import { ETIQUETA_ROL } from "@/lib/roles";
 import { type Rol, RolSchema } from "@/schemas/rol";
@@ -21,7 +23,7 @@ function rutaMiembro(proyectoId: string, uid: string): string {
 }
 
 /** Acciones contra la API: anuncia el resultado y refresca la página. */
-function useAccionesMiembro(ruta: string, nombre: string) {
+function useAccionesMiembro(ruta: string) {
   const router = useRouter();
   const [aviso, setAviso] = useState("");
   const [ocupado, setOcupado] = useState(false);
@@ -48,7 +50,6 @@ function useAccionesMiembro(ruta: string, nombre: string) {
   }
 
   function quitar() {
-    if (!window.confirm(`¿Quitar a ${nombre} del proyecto?`)) return;
     void ejecutar(
       () => pedirApi(ruta, { method: "DELETE" }),
       "Miembro quitado.",
@@ -98,6 +99,51 @@ function SelectorRol(props: PropsSelector) {
   );
 }
 
+interface PropsQuitar {
+  nombre: string;
+  ocupado: boolean;
+  onConfirmar: () => void;
+}
+
+/** «Quitar del proyecto» pide confirmación en un diálogo antes de actuar. */
+function BotonQuitar({ nombre, ocupado, onConfirmar }: PropsQuitar) {
+  const [abierto, setAbierto] = useState(false);
+  const cerrar = useCallback(() => setAbierto(false), []);
+  function confirmar() {
+    cerrar();
+    onConfirmar();
+  }
+  return (
+    <>
+      <Boton
+        variante="peligro"
+        disabled={ocupado}
+        onClick={() => setAbierto(true)}
+      >
+        Quitar del proyecto
+      </Boton>
+      <Dialogo
+        abierto={abierto}
+        onCerrar={cerrar}
+        titulo={`Quitar a ${nombre}`}
+      >
+        <p>
+          {nombre} perderá el acceso al proyecto y a sus tareas. Si cambias de
+          idea, podrás invitarle de nuevo con un código.
+        </p>
+        <div className="acciones-formulario">
+          <Boton variante="secundario" onClick={cerrar}>
+            Cancelar
+          </Boton>
+          <Boton variante="peligro" onClick={confirmar}>
+            Quitar miembro
+          </Boton>
+        </div>
+      </Dialogo>
+    </>
+  );
+}
+
 /**
  * Acciones del propietario sobre un miembro. Solo se muestran las permitidas;
  * la API vuelve a verificarlo todo.
@@ -105,7 +151,6 @@ function SelectorRol(props: PropsSelector) {
 export function AccionesMiembro(props: PropsAcciones) {
   const { aviso, ocupado, cambiarRol, quitar } = useAccionesMiembro(
     rutaMiembro(props.proyectoId, props.uid),
-    props.nombre,
   );
 
   return (
@@ -125,14 +170,11 @@ export function AccionesMiembro(props: PropsAcciones) {
         </p>
       )}
       {props.puedeQuitar ? (
-        <button
-          type="button"
-          className="boton boton--peligro"
-          disabled={ocupado}
-          onClick={quitar}
-        >
-          Quitar del proyecto
-        </button>
+        <BotonQuitar
+          nombre={props.nombre}
+          ocupado={ocupado}
+          onConfirmar={quitar}
+        />
       ) : null}
       <p role="status" className="acciones-miembro__aviso">
         {aviso}

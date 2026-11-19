@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { useCallback, useState } from "react";
+import { Boton, clasesBoton } from "@/components/ui/Boton";
+import { EstadoVacio } from "@/components/ui/EstadoVacio";
+import { Insignia } from "@/components/ui/Insignia";
 import { useCambioEstado } from "@/hooks/useCambioEstado";
-import { ETIQUETA_ESTADO } from "@/lib/tareas-ui";
+import { ETIQUETA_ESTADO, hoyUtc } from "@/lib/tareas-ui";
 import { ESTADOS_TAREA, type EstadoTarea, type Tarea } from "@/schemas/tarea";
 import { DialogoTarea } from "./DialogoTarea";
 import { TarjetaTarea } from "./TarjetaTarea";
@@ -19,12 +22,15 @@ interface PropsTablero {
   hayFiltros: boolean;
   /** Ruta a la que se vuelve para quitar los filtros. */
   rutaSinFiltros: string;
+  /** Hoy en UTC (`AAAA-MM-DD`); si falta se calcula al pintar. */
+  hoy?: string;
 }
 
 interface PropsColumnas {
   proyectoId: string;
   tareas: Tarea[];
   nombres: ReadonlyMap<string, string>;
+  hoy: string;
   puedeEditar: boolean;
   onEditar: (tarea: Tarea) => void;
   onCambiarEstado: (tarea: Tarea, estado: EstadoTarea) => void;
@@ -41,8 +47,9 @@ function Columnas({ proyectoId, tareas, nombres, ...acciones }: PropsColumnas) {
             className="columna"
             aria-labelledby={`col-${estado}`}
           >
-            <h3 id={`col-${estado}`}>
-              {ETIQUETA_ESTADO[estado]} ({columna.length})
+            <h3 id={`col-${estado}`} className="columna__titulo">
+              {ETIQUETA_ESTADO[estado]}
+              <Insignia>{String(columna.length)}</Insignia>
             </h3>
             {columna.length === 0 ? (
               <p className="texto-tenue">Sin tareas en este estado.</p>
@@ -68,20 +75,35 @@ function Columnas({ proyectoId, tareas, nombres, ...acciones }: PropsColumnas) {
   );
 }
 
-function SinTareas({
-  hayFiltros,
-  ruta,
-}: {
+interface PropsSinTareas {
   hayFiltros: boolean;
   ruta: string;
-}) {
-  return hayFiltros ? (
-    <p className="vacio">
-      Ninguna tarea coincide con los filtros.{" "}
-      <Link href={ruta}>Quitar filtros</Link>
-    </p>
-  ) : (
-    <p className="vacio">Este proyecto todavía no tiene tareas.</p>
+  puedeCrear: boolean;
+}
+
+function SinTareas({ hayFiltros, ruta, puedeCrear }: PropsSinTareas) {
+  if (hayFiltros) {
+    return (
+      <EstadoVacio
+        titulo="Ninguna tarea coincide con los filtros"
+        mensaje="Prueba con otros filtros o quítalos para ver todas las tareas."
+        accion={
+          <Link href={ruta} className={clasesBoton("secundario")}>
+            Quitar filtros
+          </Link>
+        }
+      />
+    );
+  }
+  return (
+    <EstadoVacio
+      titulo="Este proyecto todavía no tiene tareas"
+      mensaje={
+        puedeCrear
+          ? "Crea la primera con el botón «Nueva tarea»."
+          : "Cuando alguien con permiso cree tareas, aparecerán aquí."
+      }
+    />
   );
 }
 
@@ -101,24 +123,27 @@ export function TableroTareas(props: PropsTablero) {
   return (
     <div className="pila">
       {props.puedeCrear ? (
-        <button
-          type="button"
-          className="boton"
-          onClick={() => setSolicitud({ modo: "crear" })}
-        >
-          Nueva tarea
-        </button>
+        <div className="acciones-tablero">
+          <Boton onClick={() => setSolicitud({ modo: "crear" })}>
+            Nueva tarea
+          </Boton>
+        </div>
       ) : null}
       <p role="alert" className="formulario__mensaje">
         {error}
       </p>
       {visibles.length === 0 ? (
-        <SinTareas hayFiltros={props.hayFiltros} ruta={props.rutaSinFiltros} />
+        <SinTareas
+          hayFiltros={props.hayFiltros}
+          ruta={props.rutaSinFiltros}
+          puedeCrear={props.puedeCrear}
+        />
       ) : (
         <Columnas
           proyectoId={props.proyectoId}
           tareas={visibles}
           nombres={nombres}
+          hoy={props.hoy ?? hoyUtc()}
           puedeEditar={props.puedeEditar}
           onEditar={(tarea) => setSolicitud({ modo: "editar", tarea })}
           onCambiarEstado={cambiarEstado}

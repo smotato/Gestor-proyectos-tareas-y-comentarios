@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { EstadoVacio } from "@/components/ui/EstadoVacio";
+import { Insignia } from "@/components/ui/Insignia";
 import { sesionRequerida } from "@/lib/proyectos-servidor";
 import { ETIQUETA_ROL } from "@/lib/roles";
 import { listarMisProyectos } from "@/services/proyectos";
+import { BotonNuevoProyecto } from "./BotonNuevoProyecto";
 
 const LIMITE_PAGINA = 50;
 
@@ -14,10 +17,11 @@ export async function ListaProyectos() {
 
   if (items.length === 0) {
     return (
-      <p className="vacio">
-        Aún no tienes proyectos. Crea el primero con el formulario de arriba o
-        pide a alguien de tu equipo un código de invitación.
-      </p>
+      <EstadoVacio
+        titulo="Aún no tienes proyectos"
+        mensaje="Crea el primero o pide a alguien de tu equipo un código de invitación."
+        accion={<BotonNuevoProyecto texto="Crear mi primer proyecto" />}
+      />
     );
   }
 
@@ -28,9 +32,14 @@ export async function ListaProyectos() {
           <Link href={`/proyectos/${proyecto.id}`} className="enlace-fuerte">
             {proyecto.nombre}
           </Link>
-          <p className="texto-tenue">
-            Tu rol: {ETIQUETA_ROL[proyecto.rol]} · {proyecto.totalMiembros}{" "}
-            {proyecto.totalMiembros === 1 ? "miembro" : "miembros"}
+          <p className="proyecto__datos">
+            <Insignia tono={proyecto.rol === "propietario" ? "info" : "neutra"}>
+              {`Tu rol: ${ETIQUETA_ROL[proyecto.rol]}`}
+            </Insignia>
+            <span className="texto-tenue">
+              {proyecto.totalMiembros}{" "}
+              {proyecto.totalMiembros === 1 ? "miembro" : "miembros"}
+            </span>
           </p>
         </li>
       ))}

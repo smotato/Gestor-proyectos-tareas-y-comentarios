@@ -1,7 +1,6 @@
-import Link from "next/link";
 import { type ReactNode, Suspense } from "react";
 import { Esqueleto } from "@/components/Esqueleto";
-import { NavProyecto } from "@/components/proyectos/NavProyecto";
+import { EncabezadoPagina } from "@/components/ui/EncabezadoPagina";
 import { proyectoDelUsuario } from "@/lib/proyectos-servidor";
 import { ETIQUETA_ROL } from "@/lib/roles";
 
@@ -15,28 +14,25 @@ async function EncabezadoProyecto({ params }: Pick<PropsLayout, "params">) {
   const { id } = await params;
   const { proyecto, rol } = await proyectoDelUsuario(id);
   return (
-    <>
-      <h1>{proyecto.nombre}</h1>
-      <p className="texto-tenue">Tu rol: {ETIQUETA_ROL[rol]}</p>
-      <NavProyecto id={id} />
-    </>
+    <EncabezadoPagina
+      titulo={proyecto.nombre}
+      descripcion={`Tu rol: ${ETIQUETA_ROL[rol]}`}
+    />
   );
 }
 
-/** Layout compartido de /proyectos/[id] y sus subrutas. */
+/**
+ * Layout compartido de /proyectos/[id] y sus subrutas. Las secciones del
+ * proyecto (Tablero, Mis tareas, Miembros) están en el menú lateral.
+ */
 export default function LayoutProyecto({ children, params }: PropsLayout) {
   return (
     <div className="pila">
-      <p>
-        <Link href="/proyectos">← Mis proyectos</Link>
-      </p>
-      <div className="encabezado-proyecto">
-        <Suspense
-          fallback={<Esqueleto etiqueta="Cargando el proyecto…" lineas={2} />}
-        >
-          <EncabezadoProyecto params={params} />
-        </Suspense>
-      </div>
+      <Suspense
+        fallback={<Esqueleto etiqueta="Cargando el proyecto…" lineas={2} />}
+      >
+        <EncabezadoProyecto params={params} />
+      </Suspense>
       {children}
     </div>
   );

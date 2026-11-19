@@ -1,0 +1,232 @@
+/* Componentes base (src/components/ui/) y formularios. Convención BEM. */
+
+/* Botón: primario por defecto; --secundario y --peligro lo modifican. */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e-2);
+  min-height: 2.75rem; /* objetivo táctil ≥ 44 px */
+  padding: var(--e-2) var(--e-4);
+  border: 1px solid var(--acento);
+  border-radius: var(--radio);
+  background: var(--acento);
+  color: var(--acento-texto);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity var(--duracion);
+}
+
+.boton:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.boton:disabled {
+  opacity: 0.7;
+  cursor: progress;
+}
+
+.boton--secundario {
+  border-color: var(--borde);
+  background: var(--superficie);
+  color: var(--texto);
+}
+
+.boton--peligro {
+  border-color: var(--error);
+  background: var(--superficie);
+  color: var(--error);
+}
+
+/* Insignia: siempre lleva texto; el color solo la refuerza. */
+.insignia {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 var(--e-2);
+  border: 1px solid transparent;
+  border-radius: 99rem;
+  background: var(--acento-suave);
+  color: var(--acento);
+  gap: var(--e-1);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  line-height: 1.5rem;
+  white-space: nowrap;
+}
+
+.insignia .icono {
+  width: 1rem;
+  height: 1rem;
+}
+
+.insignia--exito {
+  background: var(--exito-fondo);
+  color: var(--exito-texto);
+}
+
+.insignia--aviso {
+  background: var(--aviso-fondo);
+  color: var(--aviso-texto);
+}
+
+.insignia--error {
+  background: var(--error-fondo);
+  color: var(--error);
+}
+
+.insignia--info {
+  background: var(--info-fondo);
+  color: var(--info-texto);
+}
+
+/* Tarjeta (componente Tarjeta) */
+.panel {
+  padding: var(--e-4);
+  border: 1px solid var(--divisor);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  box-shadow: var(--sombra-1);
+}
+
+.panel__titulo {
+  margin: 0 0 var(--e-3);
+}
+
+/* Encabezado de página: h1 a la izquierda y la acción principal a la derecha. */
+.encabezado-pagina {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-3) var(--e-4);
+}
+
+.encabezado-pagina__texto > * {
+  margin: 0;
+}
+
+.encabezado-pagina__titulo {
+  overflow-wrap: anywhere;
+}
+
+/* Estado vacío: mensaje claro y una acción. */
+.estado-vacio,
+.vacio {
+  display: grid;
+  justify-items: start;
+  gap: var(--e-3);
+  padding: var(--e-5) var(--e-4);
+  border: 1px dashed var(--borde);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  color: var(--texto-tenue);
+}
+
+.estado-vacio > *,
+.vacio {
+  margin: 0;
+}
+
+.estado-vacio__titulo {
+  color: var(--texto);
+  font-size: var(--texto-lg);
+}
+
+/* Tarjeta de las pantallas de acceso */
+.tarjeta {
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+  padding: var(--e-5);
+  border: 1px solid var(--divisor);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  box-shadow: var(--sombra-2);
+}
+
+/* Formularios: en móvil el botón principal ocupa todo el ancho. */
+.formulario {
+  display: grid;
+  gap: var(--e-4);
+}
+
+.formulario > .boton[type="submit"],
+.tarjeta .boton {
+  width: 100%;
+}
+
+.tarjeta h1 {
+  margin-top: 0;
+}
+
+.campo {
+  display: grid;
+  gap: var(--e-1);
+}
+
+.campo label {
+  font-weight: 600;
+}
+
+.campo input,
+.campo select,
+.campo textarea {
+  min-height: 2.75rem;
+  padding: var(--e-2) var(--e-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+}
+
+.campo input[aria-invalid="true"] {
+  border: 2px solid var(--error);
+}
+
+.campo__error,
+.formulario__mensaje {
+  margin: 0;
+  color: var(--error);
+}
+
+.formulario__mensaje:empty {
+  display: none;
+}
+
+/* Esqueleto de carga */
+.esqueleto {
+  display: grid;
+  gap: var(--e-3);
+}
+
+.esqueleto__linea {
+  height: 1rem;
+  border-radius: var(--radio);
+  background: var(--divisor);
+  animation: pulso 1.5s ease-in-out infinite;
+}
+
+.esqueleto__linea--titulo {
+  width: 60%;
+  height: 2rem;
+}
+
+.esqueleto__linea--corta {
+  width: 40%;
+}
+
+@keyframes pulso {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (min-width: 48rem) {
+  .formulario > .boton[type="submit"] {
+    width: auto;
+    justify-self: start;
+  }
+}

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { SIN_INDEXAR } from "@/lib/seo";
 import { Suspense } from "react";
 import { Esqueleto } from "@/components/Esqueleto";
-import { FormularioNuevoProyecto } from "@/components/proyectos/FormularioNuevoProyecto";
+import { BotonNuevoProyecto } from "@/components/proyectos/BotonNuevoProyecto";
 import { ListaProyectos } from "@/components/proyectos/ListaProyectos";
+import { EncabezadoPagina } from "@/components/ui/EncabezadoPagina";
+import { SIN_INDEXAR } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Mis proyectos",
@@ -17,11 +18,11 @@ export const metadata: Metadata = {
 export default function PaginaProyectos() {
   return (
     <div className="pila">
-      <h1>Mis proyectos</h1>
-      <section aria-labelledby="titulo-crear" className="tarjeta-borde">
-        <h2 id="titulo-crear">Crear proyecto</h2>
-        <FormularioNuevoProyecto />
-      </section>
+      <EncabezadoPagina
+        titulo="Mis proyectos"
+        descripcion="Los proyectos en los que participas con tu equipo."
+        accion={<BotonNuevoProyecto />}
+      />
       <section aria-labelledby="titulo-lista">
         <h2 id="titulo-lista">Tus proyectos</h2>
         <Suspense fallback={<Esqueleto etiqueta="Cargando tus proyectos…" />}>

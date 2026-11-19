@@ -148,7 +148,7 @@ describe("TableroTareas · diálogo de tarea", () => {
     expect(dialogo.modales).toBe(1);
     const ventana = screen.getByRole("dialog", { name: "Nueva tarea" });
     await userEvent.click(
-      within(ventana).getByRole("button", { name: "Guardar" }),
+      within(ventana).getByRole("button", { name: "Crear tarea" }),
     );
     expect(within(ventana).getByText("El título es obligatorio")).toBeVisible();
     expect(pedirApi).not.toHaveBeenCalled();
@@ -157,7 +157,7 @@ describe("TableroTareas · diálogo de tarea", () => {
       "Preparar demo",
     );
     await userEvent.click(
-      within(ventana).getByRole("button", { name: "Guardar" }),
+      within(ventana).getByRole("button", { name: "Crear tarea" }),
     );
     expect(pedirApi).toHaveBeenCalledWith("/api/proyectos/p1/tareas", {
       method: "POST",

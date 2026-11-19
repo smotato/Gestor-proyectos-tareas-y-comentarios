@@ -24,6 +24,7 @@ function FormularioTarea({
     onCerrar,
   );
   const tarea = solicitud.modo === "editar" ? solicitud.tarea : null;
+  const textoGuardar = tarea ? "Guardar cambios" : "Crear tarea";
   return (
     <form className="formulario" onSubmit={guardar} noValidate>
       <CamposTarea tarea={tarea} miembros={miembros} errores={errores} />
@@ -31,15 +32,15 @@ function FormularioTarea({
         {aviso}
       </p>
       <div className="acciones-formulario">
-        <button type="submit" className="boton" disabled={enviando}>
-          {enviando ? "Guardando…" : "Guardar"}
-        </button>
         <button
           type="button"
           className="boton boton--secundario"
           onClick={onCerrar}
         >
           Cancelar
+        </button>
+        <button type="submit" className="boton" disabled={enviando}>
+          {enviando ? "Guardando…" : textoGuardar}
         </button>
       </div>
     </form>

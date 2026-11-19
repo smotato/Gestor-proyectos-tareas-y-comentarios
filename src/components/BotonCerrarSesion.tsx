@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { IconoSalir } from "@/components/app/Iconos";
 import { mensajeDeErrorAuth } from "@/lib/mensajes-auth";
 import { cerrarSesion } from "@/lib/sesion-cliente";
 
@@ -22,8 +23,9 @@ export function BotonCerrarSesion() {
 
   return (
     <>
-      <button type="button" className="boton boton--secundario" onClick={salir}>
-        Cerrar sesión
+      <button type="button" className="enlace-menu" onClick={salir}>
+        <IconoSalir />
+        <span className="enlace-menu__texto">Cerrar sesión</span>
       </button>
       <span role="alert" className="sr-only">
         {error}

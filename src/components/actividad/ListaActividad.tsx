@@ -1,3 +1,4 @@
+import { EstadoVacio } from "@/components/ui/EstadoVacio";
 import { formatearFechaHora } from "@/lib/tareas-ui";
 import type { Actividad } from "@/schemas/actividad";
 
@@ -12,7 +13,9 @@ interface PropsLista {
 /** Registro del proyecto, lo más reciente primero. */
 export function ListaActividad({ items, nombres, hayMas }: PropsLista) {
   if (items.length === 0) {
-    return <p className="vacio">Todavía no hay actividad en este proyecto.</p>;
+    return (
+      <EstadoVacio mensaje="Todavía no hay actividad en este proyecto. Aparecerá aquí cuando alguien cree o cambie tareas." />
+    );
   }
   return (
     <>

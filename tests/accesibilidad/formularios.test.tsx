@@ -43,7 +43,9 @@ describe("axe · formularios de la aplicación", () => {
       <FormularioComentario proyectoId="p1" tareaId="t1" />,
     );
     expect(await problemasDeAccesibilidad(container)).toEqual([]);
-    await userEvent.click(screen.getByRole("button", { name: "Comentar" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Publicar comentario" }),
+    );
     expect(screen.getByLabelText("Escribe un comentario")).toHaveAttribute(
       "aria-invalid",
       "true",

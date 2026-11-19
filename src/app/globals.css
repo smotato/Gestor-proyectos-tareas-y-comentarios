@@ -1,32 +1,95 @@
-/* Mobile-first: estilos base para 360 px; se amplían con min-width. */
+/*
+ * Sistema de diseño: tokens y base. Mobile-first, sin anchos fijos en px.
+ *
+ * Los nueve primeros tokens de color los lee tests/estilos/contraste.test.ts
+ * (WCAG AA: texto 4,5:1, controles 3:1). Los demás colores son de apoyo:
+ * siempre llevan texto o un borde, nunca informan solo con el color.
+ * Los componentes viven en ui.css y app-shell.css.
+ */
 
 :root {
   color-scheme: light dark;
-  --fondo: #ffffff;
-  --superficie: #f4f4f5;
-  --texto: #18181b;
-  --texto-tenue: #52525b; /* 7.7:1 sobre --fondo */
-  --borde: #71717a; /* 4.8:1, controles ≥ 3:1 */
-  --acento: #1d4ed8; /* 6.7:1 con texto blanco */
+
+  /* Color · tema claro (neutros slate + un solo primario índigo) */
+  --fondo: #f1f5f9;
+  --superficie: #ffffff;
+  --texto: #0f172a;
+  --texto-tenue: #475569; /* 6,8:1 sobre --superficie */
+  --borde: #64748b; /* controles ≥ 3:1 */
+  --acento: #4338ca; /* 8:1 con texto blanco */
   --acento-texto: #ffffff;
-  --error: #b91c1c;
-  --foco: #1d4ed8;
+  --error: #b42318;
+  --foco: #4338ca;
+
+  /* Apoyo: divisores decorativos y colores semánticos suaves (texto ≥ 7:1) */
+  --divisor: #e2e8f0;
+  --acento-suave: #eef2ff;
+  --exito-fondo: #ecfdf3;
+  --exito-texto: #05603a;
+  --aviso-fondo: #fffaeb;
+  --aviso-texto: #93370d;
+  --info-fondo: #eff6ff;
+  --info-texto: #1e40af;
+  --error-fondo: #fef3f2;
+
+  /* Espaciado (escala de 4 px a 48 px, en rem) */
+  --e-1: 0.25rem;
+  --e-2: 0.5rem;
+  --e-3: 0.75rem;
+  --e-4: 1rem;
+  --e-5: 1.5rem;
+  --e-6: 2rem;
+  --e-7: 3rem;
+  --espacio: clamp(1rem, 0.5rem + 2vw, 2rem); /* margen de página */
+
+  /* Radios y sombras muy sutiles */
+  --radio-sm: 0.375rem;
   --radio: 0.5rem;
-  --espacio: clamp(1rem, 4vw, 2rem);
+  --radio-lg: 0.75rem;
+  --sombra-1: 0 1px 2px rgb(0 0 0 / 0.06);
+  --sombra-2: 0 0.25rem 0.75rem rgb(0 0 0 / 0.08);
+  --sombra-3: 0 0.5rem 1.5rem rgb(0 0 0 / 0.16);
+
+  /* Tipografía: una sola familia (next/font) */
   --fuente: var(--font-geist-sans), system-ui, sans-serif;
+  --texto-xs: 0.8125rem;
+  --texto-sm: 0.875rem;
+  --texto-base: 1rem;
+  --texto-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.1875rem);
+  --titulo-2: clamp(1.125rem, 1.05rem + 0.4vw, 1.375rem);
+  --titulo-1: clamp(1.5rem, 1.25rem + 1.2vw, 2rem);
+
+  /* Estructura */
+  --menu-ancho: 16rem;
+  --menu-ancho-contraido: 4.5rem;
+  --barra-alto: 3.5rem;
+  --pagina-ancho: 72rem;
+  --duracion: 0.2s;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fondo: #09090b;
-    --superficie: #18181b;
-    --texto: #fafafa;
-    --texto-tenue: #a1a1aa;
-    --borde: #a1a1aa;
-    --acento: #93c5fd;
-    --acento-texto: #09090b;
+    --fondo: #0f172a;
+    --superficie: #1e293b;
+    --texto: #f1f5f9;
+    --texto-tenue: #a8b5c9;
+    --borde: #8494ac;
+    --acento: #a5b4fc;
+    --acento-texto: #0f172a;
     --error: #fca5a5;
-    --foco: #93c5fd;
+    --foco: #a5b4fc;
+    --divisor: #334155;
+    --acento-suave: #312e81;
+    --exito-fondo: #14352a;
+    --exito-texto: #86efac;
+    --aviso-fondo: #3b2a0b;
+    --aviso-texto: #fcd34d;
+    --info-fondo: #172a4d;
+    --info-texto: #93c5fd;
+    --error-fondo: #3f1d1d;
+    --sombra-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --sombra-2: 0 0.25rem 0.75rem rgb(0 0 0 / 0.4);
+    --sombra-3: 0 0.5rem 1.5rem rgb(0 0 0 / 0.6);
   }
 }
 
@@ -34,18 +97,19 @@
  * Alto contraste (prefers-contrast: more): texto a 7:1 o más y controles a
  * 4,5:1 o más, en claro y en oscuro. El bloque "oscuro + alto contraste" va
  * después y repite todos los tokens, para que no se cuelen los del claro.
+ * Los colores de apoyo se reemplazan en contraste.css.
  */
 @media (prefers-contrast: more) {
   :root {
     --fondo: #ffffff;
     --superficie: #ffffff;
     --texto: #000000;
-    --texto-tenue: #3f3f46;
-    --borde: #27272a;
-    --acento: #1e3a8a;
+    --texto-tenue: #334155;
+    --borde: #334155;
+    --acento: #312e81;
     --acento-texto: #ffffff;
     --error: #7f1d1d;
-    --foco: #1e3a8a;
+    --foco: #312e81;
   }
 }
 
@@ -54,9 +118,9 @@
     --fondo: #000000;
     --superficie: #000000;
     --texto: #ffffff;
-    --texto-tenue: #e4e4e7;
-    --borde: #e4e4e7;
-    --acento: #bfdbfe;
+    --texto-tenue: #e2e8f0;
+    --borde: #e2e8f0;
+    --acento: #c7d2fe;
     --acento-texto: #000000;
     --error: #fecaca;
     --foco: #ffffff;
@@ -72,23 +136,27 @@
 body {
   margin: 0;
   min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
   background: var(--fondo);
   color: var(--texto);
   font-family: var(--fuente);
-  font-size: 1rem;
+  font-size: var(--texto-base);
   line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
 h3 {
-  line-height: 1.2;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 h1 {
-  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  font-size: var(--titulo-1);
+}
+
+h2 {
+  font-size: var(--titulo-2);
 }
 
 a {
@@ -104,17 +172,17 @@ a {
 /* Enlace "Saltar al contenido": visible solo al recibir el foco. */
 .saltar {
   position: absolute;
-  left: 1rem;
+  left: var(--e-4);
   top: -100%;
-  z-index: 10;
-  padding: 0.75rem 1rem;
+  z-index: 40;
+  padding: var(--e-3) var(--e-4);
   background: var(--acento);
   color: var(--acento-texto);
   border-radius: var(--radio);
 }
 
 .saltar:focus {
-  top: 1rem;
+  top: var(--e-4);
 }
 
 .sr-only {
@@ -126,158 +194,8 @@ a {
   white-space: nowrap;
 }
 
-.encabezado {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
-  padding: 0.75rem var(--espacio);
-  border-bottom: 1px solid var(--borde);
-}
-
-.encabezado__marca {
-  color: var(--texto);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.menu {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 1rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.menu a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2.75rem; /* objetivo táctil ≥ 44 px */
-}
-
-.contenido {
-  flex: 1;
-  width: 100%;
-  max-width: 70rem;
-  margin-inline: auto;
-  padding: var(--espacio);
-}
-
-.contenido:focus {
-  outline: none;
-}
-
-.contenido p {
-  max-width: 70ch;
-}
-
-.pie {
-  padding: 1rem var(--espacio);
-  border-top: 1px solid var(--borde);
-  color: var(--texto-tenue);
-  font-size: 0.875rem;
-}
-
 .texto-tenue {
   color: var(--texto-tenue);
-}
-
-.tarjeta {
-  width: 100%;
-  max-width: 28rem;
-  margin-inline: auto;
-}
-
-.boton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.75rem;
-  padding: 0.5rem 1.25rem;
-  border: 2px solid var(--acento);
-  border-radius: var(--radio);
-  background: var(--acento);
-  color: var(--acento-texto);
-  font: inherit;
-  font-weight: 600;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.boton:disabled {
-  opacity: 0.7;
-  cursor: progress;
-}
-
-.boton--secundario {
-  background: transparent;
-  color: var(--acento);
-}
-
-.formulario {
-  display: grid;
-  gap: 1rem;
-}
-
-.campo {
-  display: grid;
-  gap: 0.25rem;
-}
-
-.campo input,
-.campo select,
-.campo textarea {
-  min-height: 2.75rem;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
-  background: var(--fondo);
-  color: var(--texto);
-  font: inherit;
-}
-
-.campo input[aria-invalid="true"] {
-  border: 2px solid var(--error);
-}
-
-.campo__error,
-.formulario__mensaje {
-  margin: 0;
-  color: var(--error);
-}
-
-.formulario__mensaje:empty {
-  display: none;
-}
-
-.esqueleto {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.esqueleto__linea {
-  height: 1rem;
-  border-radius: var(--radio);
-  background: var(--superficie);
-  animation: pulso 1.5s ease-in-out infinite;
-}
-
-.esqueleto__linea--titulo {
-  width: 60%;
-  height: 2rem;
-}
-
-.esqueleto__linea--corta {
-  width: 40%;
-}
-
-@keyframes pulso {
-  50% {
-    opacity: 0.5;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -288,11 +206,5 @@ a {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-}
-
-@media (min-width: 48rem) {
-  .encabezado {
-    flex-wrap: nowrap;
   }
 }

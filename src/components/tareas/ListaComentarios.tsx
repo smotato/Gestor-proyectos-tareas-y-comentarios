@@ -1,3 +1,4 @@
+import { EstadoVacio } from "@/components/ui/EstadoVacio";
 import { formatearFechaHora } from "@/lib/tareas-ui";
 import type { Comentario } from "@/schemas/comentario";
 
@@ -10,7 +11,9 @@ interface PropsLista {
 /** El texto se muestra como texto plano: React lo escapa, no se interpreta HTML. */
 export function ListaComentarios({ items, nombres }: PropsLista) {
   if (items.length === 0) {
-    return <p className="vacio">Todavía no hay comentarios en esta tarea.</p>;
+    return (
+      <EstadoVacio mensaje="Todavía no hay comentarios en esta tarea. Los nuevos aparecerán aquí." />
+    );
   }
   return (
     <ol className="comentarios">

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import { Geist } from "next/font/google";
 import { Suspense } from "react";
-import { EnlacesInvitado, MenuSesion } from "@/components/MenuSesion";
+import { MarcoApp } from "@/components/app/MarcoApp";
+import { MenuLateral, MenuLateralCargando } from "@/components/app/MenuLateral";
 import { metadatosDelSitio } from "@/lib/seo";
 import "./globals.css";
+import "./ui.css";
+import "./app-shell.css";
 import "./invitaciones.css";
 import "./proyectos.css";
 import "./tareas.css";
@@ -15,36 +17,24 @@ const geistSans = Geist({
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = metadatosDelSitio();
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="es" className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="es" className={geistSans.variable}>
       <body>
         <a href="#contenido" className="saltar">
           Saltar al contenido
         </a>
-        <header className="encabezado">
-          <Link href="/" className="encabezado__marca">
-            Gestor de proyectos
-          </Link>
-          <nav aria-label="Principal">
-            <Suspense fallback={<EnlacesInvitado />}>
-              <MenuSesion />
+        <MarcoApp
+          menu={
+            <Suspense fallback={<MenuLateralCargando />}>
+              <MenuLateral />
             </Suspense>
-          </nav>
-        </header>
-        <main id="contenido" tabIndex={-1} className="contenido">
+          }
+        >
           {children}
-        </main>
-        <footer className="pie">
-          <p>Gestor de proyectos · Proyecto de clase</p>
-        </footer>
+        </MarcoApp>
       </body>
     </html>
   );

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { SIN_INDEXAR } from "@/lib/seo";
 import { Suspense } from "react";
 import { PanelActividad } from "@/components/actividad/PanelActividad";
 import { Esqueleto } from "@/components/Esqueleto";
 import { PanelTareas } from "@/components/tareas/PanelTareas";
+import { Tarjeta } from "@/components/ui/Tarjeta";
+import { SIN_INDEXAR } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Tareas del proyecto",
@@ -25,12 +26,11 @@ export default function PaginaTareas({ params, searchParams }: PropsPagina) {
           <PanelTareas params={params} searchParams={searchParams} />
         </Suspense>
       </section>
-      <section aria-labelledby="titulo-actividad">
-        <h2 id="titulo-actividad">Actividad</h2>
+      <Tarjeta titulo="Actividad">
         <Suspense fallback={<Esqueleto etiqueta="Cargando la actividad…" />}>
           <PanelActividad params={params} />
         </Suspense>
-      </section>
+      </Tarjeta>
     </div>
   );
 }

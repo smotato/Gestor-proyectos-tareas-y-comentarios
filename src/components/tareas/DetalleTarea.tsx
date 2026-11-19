@@ -3,6 +3,7 @@ import {
   miembrosDelProyecto,
   tareaDelProyecto,
 } from "@/lib/proyectos-servidor";
+import { Tarjeta } from "@/components/ui/Tarjeta";
 import { listarComentarios } from "@/services/gestion-comentarios";
 import { puede } from "@/services/permisos";
 import { DatosTarea } from "./DatosTarea";
@@ -36,21 +37,28 @@ export async function DetalleTarea({ params }: PropsDetalle) {
       <p>
         <Link href={`/proyectos/${id}`}>← Volver al tablero</Link>
       </p>
-      <h2 id="titulo-detalle">{tarea.titulo}</h2>
-      <DatosTarea tarea={tarea} responsable={responsable} />
-      {tarea.descripcion ? (
-        <p className="tarea__descripcion">{tarea.descripcion}</p>
-      ) : null}
+      <Tarjeta>
+        <h2 id="titulo-detalle" className="panel__titulo">
+          {tarea.titulo}
+        </h2>
+        <DatosTarea tarea={tarea} responsable={responsable} />
+        {tarea.descripcion ? (
+          <p className="tarea__descripcion">{tarea.descripcion}</p>
+        ) : null}
+      </Tarjeta>
       <section aria-labelledby="titulo-comentarios" className="pila">
         <h3 id="titulo-comentarios">
           Comentarios ({comentarios.items.length})
         </h3>
         <ListaComentarios items={comentarios.items} nombres={nombres} />
         {puede(rol, "crear") ? (
-          <FormularioComentario proyectoId={id} tareaId={tid} />
+          <Tarjeta>
+            <FormularioComentario proyectoId={id} tareaId={tid} />
+          </Tarjeta>
         ) : (
           <p className="texto-tenue">
             Con el rol de lector puedes leer los comentarios, pero no escribir.
+            Pide al propietario que te cambie el rol si necesitas comentar.
           </p>
         )}
       </section>

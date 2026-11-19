@@ -2,14 +2,31 @@
 
 .filtros {
   display: grid;
-  gap: 1rem;
+  gap: var(--e-2) var(--e-4);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--divisor);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+}
+
+.filtros .pestanas {
+  border-bottom: 0;
 }
 
 .filtros__form {
   display: flex;
   flex-wrap: wrap;
   align-items: end;
-  gap: 0.75rem 1rem;
+  gap: var(--e-2) var(--e-3);
+}
+
+.filtros .campo label {
+  font-size: var(--texto-sm);
+}
+
+.acciones-tablero {
+  display: flex;
+  justify-content: flex-end;
 }
 
 .tablero {
@@ -21,10 +38,27 @@
   min-width: 0;
 }
 
-.columna > h3 {
-  margin: 0 0 0.75rem;
-  padding-bottom: 0.25rem;
-  border-bottom: 2px solid var(--borde);
+.columna__titulo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e-2);
+  margin: 0 0 var(--e-3);
+  padding-bottom: var(--e-1);
+  border-bottom: 2px solid var(--divisor);
+  font-size: var(--texto-lg);
+}
+
+.tarea__insignias {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e-2);
+  margin: 0;
+}
+
+.tarea__datos--ancho {
+  gap: var(--e-2) var(--e-4);
+  font-size: var(--texto-base);
 }
 
 .lista-tareas {
@@ -37,11 +71,12 @@
 
 .tarea {
   display: grid;
-  gap: 0.5rem;
-  padding: 1rem;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
+  gap: var(--e-2);
+  padding: var(--e-4);
+  border: 1px solid var(--divisor);
+  border-radius: var(--radio-lg);
   background: var(--superficie);
+  box-shadow: var(--sombra-1);
 }
 
 .tarea__titulo {
@@ -77,19 +112,33 @@
   padding: 0.5rem;
   border: 1px solid var(--borde);
   border-radius: var(--radio);
-  background: var(--fondo);
+  background: var(--superficie);
   color: var(--texto);
   font: inherit;
 }
 
 .dialogo {
-  width: min(100% - 2rem, 32rem);
-  max-height: calc(100dvh - 2rem);
-  padding: 1.5rem;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
-  background: var(--fondo);
+  /* Ancho máximo con clamp(); el margen automático lo centra (ver :modal). */
+  width: clamp(18rem, 92vw, 40rem);
+  max-height: min(90dvh, 100dvh - 2rem);
+  padding: var(--e-5);
+  border: 1px solid var(--divisor);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
+  box-shadow: var(--sombra-3);
   color: var(--texto);
+  overflow-y: auto; /* scroll interno si el formulario es alto */
+  overscroll-behavior: contain;
+}
+
+/*
+ * `.pila > *` pone margin: 0 a sus hijos y anulaba el margin: auto del
+ * diálogo, que lo centra en horizontal y en vertical. Esta regla lo restituye.
+ */
+.dialogo:modal {
+  position: fixed;
+  inset: 0;
+  margin: auto;
 }
 
 .dialogo::backdrop {
@@ -100,16 +149,34 @@
   margin-top: 0;
 }
 
+/* Una columna en móvil; los avisos y los botones ocupan todo el ancho. */
+.dialogo .formulario {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .acciones-formulario {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  justify-content: flex-end;
+  gap: var(--e-3);
 }
 
 @media (min-width: 48rem) {
   .tablero {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: start;
+  }
+
+  /* Dos columnas desde 768 px; título, descripción y botones a ancho completo. */
+  .dialogo .formulario {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dialogo .campo:has(input[name="titulo"]),
+  .dialogo .campo:has(textarea),
+  .dialogo .formulario__mensaje,
+  .dialogo .acciones-formulario {
+    grid-column: 1 / -1;
   }
 }
 
@@ -131,19 +198,58 @@
 
 .comentario,
 .actividad__item {
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--borde);
-  border-radius: var(--radio);
+  padding: var(--e-3) var(--e-4);
+  border: 1px solid var(--divisor);
+  border-radius: var(--radio-lg);
+  background: var(--superficie);
 }
 
 .comentario > *,
 .actividad__item > * {
-  margin: 0.25rem 0;
+  margin: var(--e-1) 0;
+}
+
+.comentario__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--e-1) var(--e-2);
 }
 
 .comentario__texto {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+/* Actividad como línea de tiempo: una línea vertical con un punto por registro. */
+.actividad {
+  gap: 0;
+  margin-inline-start: var(--e-2);
+}
+
+.actividad__item {
+  position: relative;
+  padding: 0 0 var(--e-4) var(--e-4);
+  border: 0;
+  border-inline-start: 2px solid var(--divisor);
+  border-radius: 0;
+  background: none;
+}
+
+.actividad__item:last-child {
+  padding-bottom: 0;
+}
+
+.actividad__item::before {
+  content: "";
+  position: absolute;
+  top: 0.4rem;
+  inset-inline-start: -0.4375rem;
+  width: 0.75rem;
+  height: 0.75rem;
+  border: 2px solid var(--superficie);
+  border-radius: 50%;
+  background: var(--acento);
 }
 
 .actividad__item p {

@@ -1,8 +1,9 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ErrorApi } from "@/lib/api-cliente";
 import type { Rol } from "@/schemas/rol";
+import { simularDialogoNativo } from "../ayudas";
 
 const pedirApi = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/api-cliente", async (original) => ({
@@ -30,7 +31,10 @@ function renderMiembroGestionable(rol: Rol) {
   );
 }
 
-beforeEach(() => vi.resetAllMocks());
+beforeEach(() => {
+  vi.resetAllMocks();
+  simularDialogoNativo();
+});
 
 describe("AccionesMiembro · último propietario", () => {
   it("no ofrece cambiar el rol ni quitarlo", () => {
@@ -68,16 +72,38 @@ describe("AccionesMiembro · miembro que se puede gestionar", () => {
       "status",
     );
   });
+});
 
-  it("muestra el error de la API (por ejemplo, 409)", async () => {
+describe("AccionesMiembro · confirmación al quitar", () => {
+  it("pide confirmación en un diálogo y, al confirmar, muestra el error de la API (409)", async () => {
     pedirApi.mockRejectedValue(new ErrorApi(409, "Debe quedar un propietario"));
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     renderMiembroGestionable("lector");
     await userEvent.click(
       screen.getByRole("button", { name: "Quitar del proyecto" }),
     );
+    expect(pedirApi).not.toHaveBeenCalled();
+    const ventana = screen.getByRole("dialog", { name: /Quitar a bea/ });
+    await userEvent.click(
+      within(ventana).getByRole("button", { name: "Quitar miembro" }),
+    );
+    expect(pedirApi).toHaveBeenCalledWith("/api/proyectos/p1/miembros/u2", {
+      method: "DELETE",
+    });
     expect(
       await screen.findByText("Debe quedar un propietario"),
     ).toHaveAttribute("role", "status");
+  });
+
+  it("Cancelar cierra el diálogo sin llamar a la API", async () => {
+    renderMiembroGestionable("lector");
+    await userEvent.click(
+      screen.getByRole("button", { name: "Quitar del proyecto" }),
+    );
+    const ventana = screen.getByRole("dialog", { name: /Quitar a bea/ });
+    await userEvent.click(
+      within(ventana).getByRole("button", { name: "Cancelar" }),
+    );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(pedirApi).not.toHaveBeenCalled();
   });
 });

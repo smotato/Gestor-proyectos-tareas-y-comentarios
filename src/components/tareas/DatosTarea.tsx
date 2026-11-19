@@ -1,32 +1,33 @@
-import {
-  ETIQUETA_ESTADO,
-  ETIQUETA_PRIORIDAD,
-  formatearFecha,
-} from "@/lib/tareas-ui";
+import { hoyUtc } from "@/lib/tareas-ui";
 import type { Tarea } from "@/schemas/tarea";
+import { InsigniaEstado, InsigniaPrioridad } from "./InsigniasTarea";
+import { FechaVence, InsigniaVencida } from "./VencimientoTarea";
 
 interface PropsDatos {
   tarea: Tarea;
   /** Nombre del responsable (`null` si no tiene). */
   responsable: string | null;
+  /** Hoy en UTC (`AAAA-MM-DD`); si falta se calcula al pintar. */
+  hoy?: string;
 }
 
-export function DatosTarea({ tarea, responsable }: PropsDatos) {
+export function DatosTarea({ tarea, responsable, hoy = hoyUtc() }: PropsDatos) {
   return (
-    <dl className="tarea__datos">
+    <dl className="tarea__datos tarea__datos--ancho">
       <dt>Estado</dt>
-      <dd>{ETIQUETA_ESTADO[tarea.estado]}</dd>
+      <dd>
+        <InsigniaEstado estado={tarea.estado} />
+      </dd>
       <dt>Prioridad</dt>
-      <dd>{ETIQUETA_PRIORIDAD[tarea.prioridad]}</dd>
+      <dd>
+        <InsigniaPrioridad prioridad={tarea.prioridad} />
+      </dd>
       <dt>Responsable</dt>
       <dd>{responsable ?? "Sin responsable"}</dd>
       <dt>Vence</dt>
       <dd>
-        {tarea.vence ? (
-          <time dateTime={tarea.vence}>{formatearFecha(tarea.vence)}</time>
-        ) : (
-          "Sin fecha"
-        )}
+        <FechaVence vence={tarea.vence} />{" "}
+        <InsigniaVencida tarea={tarea} hoy={hoy} />
       </dd>
     </dl>
   );

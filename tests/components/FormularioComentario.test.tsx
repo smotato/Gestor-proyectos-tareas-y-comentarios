@@ -19,7 +19,7 @@ function pintar() {
   render(<FormularioComentario proyectoId="p1" tareaId="t1" />);
   return {
     campo: screen.getByLabelText("Escribe un comentario"),
-    boton: screen.getByRole("button", { name: "Comentar" }),
+    boton: screen.getByRole("button", { name: "Publicar comentario" }),
   };
 }
 

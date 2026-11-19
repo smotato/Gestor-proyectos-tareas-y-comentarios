@@ -5,6 +5,28 @@
 
 /* Alto contraste: bordes más gruesos y foco más grande. */
 @media (prefers-contrast: more) {
+  /* Los colores de apoyo pasan a los tokens de alto contraste. */
+  :root {
+    --divisor: var(--borde);
+    --acento-suave: var(--superficie);
+    --exito-fondo: var(--superficie);
+    --exito-texto: var(--texto);
+    --aviso-fondo: var(--superficie);
+    --aviso-texto: var(--texto);
+    --info-fondo: var(--superficie);
+    --info-texto: var(--texto);
+    --error-fondo: var(--superficie);
+  }
+
+  .insignia {
+    border-color: currentcolor;
+  }
+
+  .panel,
+  .filtros,
+  .tabla tr,
+  .estado-vacio,
+  .boton-icono,
   .tarea,
   .comentario,
   .actividad__item,
@@ -30,8 +52,20 @@
  * un borde, y el foco usa el color del sistema.
  */
 @media (forced-colors: active) {
-  .boton {
+  .boton,
+  .boton-icono,
+  .insignia {
     border: 2px solid ButtonText;
+  }
+
+  .enlace-menu[aria-current="page"] {
+    border-inline-start-color: Highlight;
+    text-decoration: underline;
+  }
+
+  .marco__velo {
+    background: Canvas;
+    opacity: 0.6;
   }
 
   :focus-visible {

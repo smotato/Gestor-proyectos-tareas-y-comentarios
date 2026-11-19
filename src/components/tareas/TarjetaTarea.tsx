@@ -1,22 +1,22 @@
 "use client";
 
 import Link from "next/link";
-import {
-  ETIQUETA_ESTADO,
-  ETIQUETA_PRIORIDAD,
-  formatearFecha,
-} from "@/lib/tareas-ui";
+import { ETIQUETA_ESTADO } from "@/lib/tareas-ui";
 import {
   ESTADOS_TAREA,
   EstadoTareaSchema,
   type EstadoTarea,
   type Tarea,
 } from "@/schemas/tarea";
+import { InsigniaPrioridad } from "./InsigniasTarea";
+import { FechaVence, InsigniaVencida } from "./VencimientoTarea";
 
 interface PropsTarjeta {
   tarea: Tarea;
   /** Página de detalle con los comentarios. */
   rutaDetalle: string;
+  /** Hoy en UTC (`AAAA-MM-DD`), para marcar las tareas vencidas. */
+  hoy: string;
   /** Nombre del responsable (`null` si no tiene). */
   responsable: string | null;
   puedeEditar: boolean;
@@ -57,18 +57,16 @@ export function TarjetaTarea(props: PropsTarjeta) {
       <h4 id={`titulo-${tarea.id}`} className="tarea__titulo">
         <Link href={props.rutaDetalle}>{tarea.titulo}</Link>
       </h4>
+      <p className="tarea__insignias">
+        <InsigniaPrioridad prioridad={tarea.prioridad} />
+        <InsigniaVencida tarea={tarea} hoy={props.hoy} />
+      </p>
       <dl className="tarea__datos">
-        <dt>Prioridad</dt>
-        <dd>{ETIQUETA_PRIORIDAD[tarea.prioridad]}</dd>
         <dt>Responsable</dt>
         <dd>{responsable ?? "Sin responsable"}</dd>
         <dt>Vence</dt>
         <dd>
-          {tarea.vence ? (
-            <time dateTime={tarea.vence}>{formatearFecha(tarea.vence)}</time>
-          ) : (
-            "Sin fecha"
-          )}
+          <FechaVence vence={tarea.vence} />
         </dd>
       </dl>
       {puedeEditar ? (

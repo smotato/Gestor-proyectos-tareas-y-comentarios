@@ -1,0 +1,270 @@
+/*
+ * Marco de la aplicación: barra superior + menú lateral izquierdo + contenido.
+ * Mobile-first: en pantallas pequeñas el menú es un panel deslizante; desde
+ * 64 rem (1024 px) es una columna fija que se puede contraer a solo iconos.
+ */
+
+html {
+  scroll-padding-top: calc(var(--barra-alto) + var(--e-4));
+}
+
+.marco {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  min-height: 100dvh;
+}
+
+/* Barra superior */
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  min-height: var(--barra-alto);
+  padding: var(--e-2) var(--espacio);
+  border-bottom: 1px solid var(--divisor);
+  background: var(--superficie);
+}
+
+.barra__marca {
+  color: var(--texto);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+/* Botones de icono (Menú, Contraer, Cerrar) */
+.boton-icono {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+  padding: var(--e-2) var(--e-3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  background: var(--superficie);
+  color: var(--texto);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.icono {
+  flex: none;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Menú lateral: cerrado (oculto del todo, así no recibe el foco) */
+.menu-lateral {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--menu-ancho), 85vw);
+  border-inline-end: 1px solid var(--divisor);
+  background: var(--superficie);
+  box-shadow: var(--sombra-3);
+  visibility: hidden;
+  transform: translateX(-100%);
+  transition:
+    transform var(--duracion) ease-out,
+    visibility 0s var(--duracion);
+}
+
+.menu-lateral--abierto {
+  visibility: visible;
+  transform: none;
+  transition-delay: 0s;
+}
+
+.menu-lateral__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--e-2) var(--e-3);
+  border-bottom: 1px solid var(--divisor);
+  font-weight: 700;
+}
+
+.menu-lateral__nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--e-3);
+}
+
+.menu-lateral__pie {
+  display: grid;
+  gap: var(--e-2);
+  padding: var(--e-3);
+  border-top: 1px solid var(--divisor);
+}
+
+.menu-lateral__correo {
+  margin: 0;
+  color: var(--texto-tenue);
+  font-size: var(--texto-sm);
+  overflow-wrap: anywhere;
+}
+
+.menu-lateral__contraer {
+  display: none;
+}
+
+/* Fondo oscurecido detrás del panel (es un botón: cierra con clic) */
+.marco__velo {
+  position: fixed;
+  inset: 0;
+  z-index: 25;
+  display: none;
+  border: 0;
+  background: rgb(0 0 0 / 0.6);
+}
+
+.marco--abierto .marco__velo {
+  display: block;
+}
+
+/* Enlaces del menú */
+.nav-lateral,
+.nav-lateral__lista {
+  display: grid;
+  gap: var(--e-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.nav-lateral {
+  gap: var(--e-4);
+}
+
+.nav-lateral__titulo {
+  margin: 0 0 var(--e-1);
+  padding-inline: var(--e-3);
+  color: var(--texto-tenue);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.enlace-menu {
+  display: flex;
+  align-items: center;
+  gap: var(--e-3);
+  min-height: 2.75rem;
+  padding: var(--e-2) var(--e-3);
+  border: 0;
+  border-inline-start: 3px solid transparent;
+  border-radius: var(--radio);
+  background: transparent;
+  color: var(--texto);
+  font: inherit;
+  text-align: start;
+  text-decoration: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.enlace-menu:hover {
+  background: var(--fondo);
+}
+
+/* El enlace activo se marca con barra, fondo y negrita, no solo con color. */
+.enlace-menu[aria-current="page"] {
+  border-inline-start-color: var(--acento);
+  background: var(--acento-suave);
+  color: var(--acento);
+  font-weight: 700;
+}
+
+/* Contenido */
+.marco__principal {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.contenido {
+  flex: 1;
+  width: 100%;
+  max-width: var(--pagina-ancho);
+  margin-inline: auto;
+  padding: var(--espacio);
+}
+
+.contenido:focus {
+  outline: none;
+}
+
+.contenido p {
+  max-width: 70ch;
+}
+
+.pie {
+  padding: var(--e-4) var(--espacio);
+  border-top: 1px solid var(--divisor);
+  color: var(--texto-tenue);
+  font-size: var(--texto-sm);
+}
+
+/* Escritorio: menú fijo desplegado, contraíble a solo iconos */
+@media (min-width: 64rem) {
+  .marco {
+    grid-template-columns: var(--menu-ancho) minmax(0, 1fr);
+    transition: grid-template-columns var(--duracion) ease-out;
+  }
+
+  .marco--contraido {
+    grid-template-columns: var(--menu-ancho-contraido) minmax(0, 1fr);
+  }
+
+  .barra {
+    grid-column: 1 / -1;
+  }
+
+  .barra__boton-menu,
+  .menu-lateral__cabecera,
+  .marco .marco__velo {
+    display: none;
+  }
+
+  .menu-lateral {
+    position: sticky;
+    top: var(--barra-alto);
+    z-index: auto;
+    width: auto;
+    height: calc(100dvh - var(--barra-alto));
+    box-shadow: none;
+    visibility: visible;
+    transform: none;
+  }
+
+  .menu-lateral__contraer {
+    display: grid;
+  }
+
+  .marco--contraido .enlace-menu__texto,
+  .marco--contraido .menu-lateral__correo,
+  .marco--contraido .nav-lateral__titulo,
+  .marco--contraido .boton-icono__texto {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .marco--contraido .enlace-menu,
+  .marco--contraido .boton-icono {
+    justify-content: center;
+    padding-inline: 0;
+  }
+}

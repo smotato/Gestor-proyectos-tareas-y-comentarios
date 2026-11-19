@@ -29,3 +29,17 @@ export function formatearFecha(dia: string): string {
     timeZone: "UTC",
   }).format(new Date(dia));
 }
+
+/** Hoy en UTC como `AAAA-MM-DD` (el mismo criterio que `formatearFecha`). */
+export function hoyUtc(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/** Vencida: tiene fecha anterior a hoy y todavía no está hecha. */
+export function estaVencida(
+  vence: string | null,
+  estado: EstadoTarea,
+  hoy: string,
+): boolean {
+  return vence !== null && estado !== "hecha" && vence < hoy;
+}

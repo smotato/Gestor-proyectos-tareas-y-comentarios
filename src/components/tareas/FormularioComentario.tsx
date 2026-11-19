@@ -22,7 +22,7 @@ export function FormularioComentario({ proyectoId, tareaId }: PropsComentario) {
         {aviso}
       </p>
       <button type="submit" className="boton" disabled={enviando}>
-        {enviando ? "Publicando…" : "Comentar"}
+        {enviando ? "Publicando…" : "Publicar comentario"}
       </button>
     </form>
   );
