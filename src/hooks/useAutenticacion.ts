@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import type { z } from "zod";
 import { mensajeDeErrorAuth } from "@/lib/mensajes-auth";
@@ -21,7 +20,6 @@ function erroresPorCampo(error: z.ZodError): ErroresCampo {
 
 /** Valida con el mismo esquema Zod que el servidor y crea la sesión. */
 export function useAutenticacion(modo: ModoAcceso) {
-  const router = useRouter();
   const [errores, setErrores] = useState<ErroresCampo>({});
   const [mensaje, setMensaje] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -42,8 +40,8 @@ export function useAutenticacion(modo: ModoAcceso) {
     try {
       await iniciarSesion(modo, resultado.data);
       const siguiente = new URLSearchParams(window.location.search);
-      router.push(destinoSeguro(siguiente.get("siguiente")));
-      router.refresh();
+      // Navegación completa: evita la respuesta precargada en la caché del enrutador.
+      window.location.assign(destinoSeguro(siguiente.get("siguiente")));
     } catch (error) {
       setMensaje(mensajeDeErrorAuth(error));
     } finally {

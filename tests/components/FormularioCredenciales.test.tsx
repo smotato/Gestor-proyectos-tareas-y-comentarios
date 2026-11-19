@@ -1,16 +1,20 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const iniciarSesion = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/sesion-cliente", () => ({ iniciarSesion }));
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
-}));
 
 import { FormularioCredenciales } from "@/components/FormularioCredenciales";
 
-beforeEach(() => vi.resetAllMocks());
+const assign = vi.fn();
+
+beforeEach(() => {
+  vi.resetAllMocks();
+  vi.stubGlobal("location", { ...window.location, assign });
+});
+
+afterEach(() => vi.unstubAllGlobals());
 
 describe("FormularioCredenciales", () => {
   it("tiene campos con etiqueta y el autocompletado correcto", () => {
