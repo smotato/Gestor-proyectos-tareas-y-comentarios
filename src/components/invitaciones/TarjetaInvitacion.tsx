@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { clasesBoton } from "@/components/ui/Boton";
 import { ETIQUETA_ROL } from "@/lib/roles";
 import type { VistaInvitacion } from "@/services/invitaciones";
 import { AceptarInvitacion } from "./AceptarInvitacion";
@@ -12,10 +13,17 @@ function Estado({ vista, codigo }: { vista: VistaInvitacion; codigo: string }) {
   if (vista.estado === "valida") return <AceptarInvitacion codigo={codigo} />;
   if (vista.estado === "miembro") {
     return (
-      <p>
-        Ya eres miembro de este proyecto.{" "}
-        <Link href={`/proyectos/${vista.proyectoId}`}>Ir al proyecto</Link>
-      </p>
+      <>
+        <p>Ya eres miembro de este proyecto.</p>
+        <p>
+          <Link
+            href={`/proyectos/${vista.proyectoId}`}
+            className={clasesBoton("primario")}
+          >
+            Ir al proyecto
+          </Link>
+        </p>
+      </>
     );
   }
   return <p className="vacio">{MENSAJES[vista.estado]}</p>;
