@@ -12,13 +12,13 @@ se reemplaza `PENDIENTE` por el valor real y se guarda el informe en
 | Requisito de 14.6                                        | Dónde                                  | Estado                                                                                          |
 | -------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | Integración continua en verde                            | [§2](#2-integración-continua)          | Hecho (ver la nota de abajo)                                                                    |
-| Informes de Lighthouse, móvil y escritorio, de 3 páginas | [§3](#3-lighthouse)                    | **Pendiente**                                                                                   |
+| Informes de Lighthouse, móvil y escritorio, de 3 páginas | [§3](#3-lighthouse)                    | Hecho: 6 informes; se cumplen todas las metas salvo SEO de `/proyectos` (decisión de diseño)    |
 | Capturas de las páginas en 360, 768 y 1024 px            | [§4](#4-capturas-en-360-768-y-1024-px) | **Pendiente**: el script está listo (`npm run capturas`); falta ejecutarlo y subir las imágenes |
 | Resultado de axe en Vitest (componentes)                 | [§5](#5-axe-y-validador-html)          | Hecho: lo ejecuta la CI dentro de `npm run check`                                               |
 | Resultado de axe en Playwright (3 anchos)                | [§5](#5-axe-y-validador-html)          | **Pendiente**: no corre en la CI; hay que ejecutar `npm run e2e`                                |
 | Validador HTML del W3C                                   | [§5](#5-axe-y-validador-html)          | **Pendiente**                                                                                   |
 | Lista de comprobación manual, con fecha                  | [§6](#6-lista-de-comprobación-manual)  | **Pendiente**                                                                                   |
-| Tabla de LCP, INP y CLS (antes y después)                | [§7](#7-core-web-vitals)               | **Pendiente**                                                                                   |
+| Tabla de LCP, INP y CLS (antes y después)                | [§7](#7-core-web-vitals)               | Parcial: LCP, CLS y TBT medidos (sin «antes»); INP **pendiente**                                |
 | Retos elegidos, con evidencia y cómo reproducirlos       | [§8](#8-retos-de-excelencia-elegidos)  | Hecho: 3 retos implementados y documentados; falta la salida de `npm run e2e`                   |
 | Demostración en vivo                                     | Toda la guía                           | **Pendiente**: se ensaya con los comandos de este documento                                     |
 
@@ -71,20 +71,46 @@ tabla que imprime `npm run test`).
 
 ## 3. Lighthouse
 
-Metas de 14.1, en **móvil** y sobre la **URL de producción** (Vercel):
-Rendimiento ≥ 90, Accesibilidad ≥ 95, Buenas prácticas ≥ 95 y SEO ≥ 95.
+Metas de 14.1, sobre la **URL de producción** (Vercel): Rendimiento ≥ 90 y
+Accesibilidad, Buenas prácticas y SEO ≥ 95. Se midieron móvil y escritorio.
 
-URL de producción medida: **PENDIENTE**.
+URL de producción medida:
+<https://gestor-proyectos-tareas-y-comentari.vercel.app> (informes guardados el
+2026-11-19).
 
-| Página       | Tipo                | Dispositivo | Rendimiento | Accesibilidad | Buenas prácticas | SEO       | Informe                                        |
-| ------------ | ------------------- | ----------- | ----------- | ------------- | ---------------- | --------- | ---------------------------------------------- |
-| Meta         |                     | Móvil       | ≥ 90        | ≥ 95          | ≥ 95             | ≥ 95      |                                                |
-| `/`          | Pública             | Móvil       | PENDIENTE   | PENDIENTE     | PENDIENTE        | PENDIENTE | `calidad/lighthouse/portada-movil.html`        |
-| `/`          | Pública             | Escritorio  | PENDIENTE   | PENDIENTE     | PENDIENTE        | PENDIENTE | `calidad/lighthouse/portada-escritorio.html`   |
-| `/login`     | Con formulario      | Móvil       | PENDIENTE   | PENDIENTE     | PENDIENTE        | PENDIENTE | `calidad/lighthouse/login-movil.html`          |
-| `/login`     | Con formulario      | Escritorio  | PENDIENTE   | PENDIENTE     | PENDIENTE        | PENDIENTE | `calidad/lighthouse/login-escritorio.html`     |
-| `/proyectos` | Con sesión iniciada | Móvil       | PENDIENTE   | PENDIENTE     | PENDIENTE        | PENDIENTE | `calidad/lighthouse/proyectos-movil.html`      |
-| `/proyectos` | Con sesión iniciada | Escritorio  | PENDIENTE   | PENDIENTE     | PENDIENTE        | PENDIENTE | `calidad/lighthouse/proyectos-escritorio.html` |
+| Página       | Tipo                | Dispositivo | Rendimiento | Accesibilidad | Buenas prácticas | SEO      | Informe                                                                   |
+| ------------ | ------------------- | ----------- | ----------- | ------------- | ---------------- | -------- | ------------------------------------------------------------------------- |
+| Meta         |                     | Ambos       | ≥ 90        | ≥ 95          | ≥ 95             | ≥ 95     |                                                                           |
+| `/`          | Pública             | Móvil       | 99 ✓        | 100 ✓         | 100 ✓            | 100 ✓    | [inicio-movil.html](calidad/lighthouse/inicio-movil.html)                 |
+| `/`          | Pública             | Escritorio  | 100 ✓       | 100 ✓         | 100 ✓            | 100 ✓    | [inicio-escritorio.html](calidad/lighthouse/inicio-escritorio.html)       |
+| `/login`     | Con formulario      | Móvil       | 98 ✓        | 100 ✓         | 96 ✓             | 100 ✓    | [login-movil.html](calidad/lighthouse/login-movil.html)                   |
+| `/login`     | Con formulario      | Escritorio  | 100 ✓       | 100 ✓         | 96 ✓             | 100 ✓    | [login-escritorio.html](calidad/lighthouse/login-escritorio.html)         |
+| `/proyectos` | Con sesión iniciada | Móvil       | 98 ✓        | 100 ✓         | 96 ✓             | **63 ✗** | [proyectos-movil.html](calidad/lighthouse/proyectos-movil.html)           |
+| `/proyectos` | Con sesión iniciada | Escritorio  | 100 ✓       | 100 ✓         | 96 ✓             | **63 ✗** | [proyectos-escritorio.html](calidad/lighthouse/proyectos-escritorio.html) |
+
+Se cumplen todas las metas **excepto el SEO de `/proyectos` (63)**. Los
+informes de la portada se llaman `inicio-*`.
+
+### SEO 63 en `/proyectos`: decisión de diseño
+
+Sacado de `proyectos-movil.html` (categoría SEO, auditorías con puntuación
+menor que 1): solo falla **`is-crawlable` · «Page is blocked from indexing»**
+(puntuación 0). Lighthouse señala dos cosas: la etiqueta
+`<meta name="robots" content="noindex, nofollow" />` de la página y el archivo
+`robots.txt` de producción.
+
+Es lo previsto en el código: `src/app/proyectos/page.tsx` declara
+`robots: SIN_INDEXAR` (`src/lib/seo.ts`) y `src/app/robots.ts` excluye `/api/`,
+`/proyectos` e `/invitacion/`. Una página con sesión es privada y no debe
+aparecer en un buscador, así que **no se corrige**: el 63 es consecuencia de
+no indexarla y no hay ninguna otra auditoría de SEO fallida. `/` y `/login`,
+que sí son indexables, sacan 100.
+
+### Buenas prácticas 96 en `/login` y `/proyectos`
+
+Cumple la meta (≥ 95). Lo que restó puntos, en los informes móviles, es la
+auditoría `inspector-issues` («Issues were logged in the Issues panel in Chrome
+DevTools»), con un problema de tipo _Content security policy_.
 
 ### Cómo generar los informes en DevTools
 
@@ -101,7 +127,8 @@ URL de producción medida: **PENDIENTE**.
 6. Repite con el dispositivo **Desktop**, y luego con las otras dos páginas.
 7. En cada informe, abre el menú de los tres puntos (arriba a la derecha) y elige
    **Save as HTML**. Guarda el archivo en `calidad/lighthouse/` con el nombre de
-   la tabla (`<página>-movil.html` o `<página>-escritorio.html`).
+   la tabla (`<página>-movil.html` o `<página>-escritorio.html`; la portada es
+   `inicio`).
 8. Copia las cuatro puntuaciones a la tabla de arriba.
 
 ## 4. Capturas en 360, 768 y 1024 px
@@ -226,13 +253,26 @@ reto 3 ([§8](#8-retos-de-excelencia-elegidos)).
 
 ## 7. Core Web Vitals
 
-Metas de 14.1, en la URL de producción, perfil móvil, al percentil 75.
+Metas de 14.1, en la URL de producción. Los valores son de **laboratorio**
+(Lighthouse, informes del 2026-11-19), no datos reales al percentil 75.
+Cada celda es móvil y escritorio.
 
-| Métrica                             | Meta     | Antes     | Después   | Qué se hizo |
-| ----------------------------------- | -------- | --------- | --------- | ----------- |
-| LCP (carga del contenido principal) | ≤ 2,5 s  | PENDIENTE | PENDIENTE | PENDIENTE   |
-| INP (respuesta a cada interacción)  | ≤ 200 ms | PENDIENTE | PENDIENTE | PENDIENTE   |
-| CLS (saltos de diseño)              | ≤ 0,1    | PENDIENTE | PENDIENTE | PENDIENTE   |
+| Página       | LCP (meta ≤ 2,5 s) | CLS (meta ≤ 0,1) | TBT (meta ≤ 200 ms) |
+| ------------ | ------------------ | ---------------- | ------------------- |
+| `/`          | 1,8 s y 0,5 s ✓    | 0 y 0 ✓          | 120 ms y 0 ms ✓     |
+| `/login`     | 1,9 s y 0,5 s ✓    | 0 y 0 ✓          | 130 ms y 0 ms ✓     |
+| `/proyectos` | 1,7 s y 0,5 s ✓    | 0 y 0 ✓          | 150 ms y 0 ms ✓     |
+
+Se cumplen todas las metas de LCP, CLS y TBT (el TBT es la aproximación de INP
+en laboratorio).
+
+| Métrica                            | Meta     | Resultado                                                       |
+| ---------------------------------- | -------- | --------------------------------------------------------------- |
+| INP (respuesta a cada interacción) | ≤ 200 ms | **PENDIENTE**: Lighthouse no lo mide en laboratorio (ver abajo) |
+
+**Sin «antes» y «después».** No se midió antes del rediseño, así que no hay
+cifras previas con las que comparar y no se atribuye ninguna mejora a un cambio
+concreto: solo se registra el estado actual.
 
 De apoyo (orientativas): FCP ≤ 1,8 s, TTFB ≤ 0,8 s y TBT ≤ 200 ms.
 
