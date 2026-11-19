@@ -81,6 +81,25 @@
   color: var(--info-texto);
 }
 
+/* Enlace de navegación suelto («Volver…»): sin subrayado fijo, con relleno al pasar. */
+.enlace-discreto {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e-2);
+  min-height: 2.75rem;
+  padding-inline: var(--e-3);
+  margin-inline-start: calc(var(--e-3) * -1);
+  border-radius: var(--radio);
+  color: var(--acento);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--duracion);
+}
+
+.enlace-discreto:hover {
+  background: var(--acento-suave);
+}
+
 /* Tarjeta (componente Tarjeta) */
 .panel {
   padding: var(--e-4);

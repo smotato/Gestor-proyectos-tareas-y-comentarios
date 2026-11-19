@@ -58,6 +58,11 @@
     border: 2px solid ButtonText;
   }
 
+  .tarea__titulo a,
+  .enlace-discreto {
+    text-decoration: underline;
+  }
+
   .enlace-menu[aria-current="page"] {
     border-inline-start-color: Highlight;
     text-decoration: underline;

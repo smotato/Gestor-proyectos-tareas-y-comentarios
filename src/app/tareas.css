@@ -77,12 +77,32 @@
   border-radius: var(--radio-lg);
   background: var(--superficie);
   box-shadow: var(--sombra-1);
+  transition:
+    border-color var(--duracion),
+    box-shadow var(--duracion);
+}
+
+.tarea:hover {
+  border-color: var(--acento);
+  box-shadow: var(--sombra-2);
 }
 
 .tarea__titulo {
   margin: 0;
   font-size: 1.0625rem;
   overflow-wrap: anywhere;
+}
+
+.tarea__titulo a {
+  color: var(--acento);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tarea__titulo a:hover,
+.tarea__titulo a:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .tarea__datos {

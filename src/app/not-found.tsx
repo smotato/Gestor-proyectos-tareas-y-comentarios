@@ -7,7 +7,9 @@ export default function NoEncontrado() {
       <h1 id="titulo-no-encontrado">Página no encontrada</h1>
       <p>La página que buscas no existe o no tienes acceso a ella.</p>
       <p>
-        <Link href="/">Volver al inicio</Link>
+        <Link href="/" className="enlace-discreto">
+          Volver al inicio
+        </Link>
       </p>
     </section>
   );

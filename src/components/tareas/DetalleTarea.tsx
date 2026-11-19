@@ -35,7 +35,9 @@ export async function DetalleTarea({ params }: PropsDetalle) {
   return (
     <article aria-labelledby="titulo-detalle" className="pila">
       <p>
-        <Link href={`/proyectos/${id}`}>← Volver al tablero</Link>
+        <Link href={`/proyectos/${id}`} className="enlace-discreto">
+          ← Volver al tablero
+        </Link>
       </p>
       <Tarjeta>
         <h2 id="titulo-detalle" className="panel__titulo">
